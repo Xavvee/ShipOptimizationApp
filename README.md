@@ -1,1 +1,2 @@
-# ShipOptimizationApp
+# Aplikacja do optymalizacji trasy statku na wodach pływowych 
+Repozytorium przechowuje kod rozwijanej aplikacji tworzonej w ramach Pracy Inżynierskiej. Celem zadanej pracy jest stworzenie programu, który udostępni interfejs, w którym możliwa będzie konfiguracja trasy statku na wodach pływowych z uwzględnieniem warunków pogodowych oraz konfiguracji od użytkownika. Zadaną pogodę będzie można podać wykorzystując plik GRIB, będący standardem pogodowym Światowej Organizacji Meteorologicznej. Ponadto aplikacja ma udostępniać punkty kontrolne możliwe do zaznaczenia na trasie oraz działać w trybie offline, bez dostępu do internetu. 
