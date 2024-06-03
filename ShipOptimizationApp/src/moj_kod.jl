@@ -1,4 +1,5 @@
 using Plots
+using Plots.PlotMeasures
 T = 24
 
 # Funkcje definiujące składowe wektorów
@@ -42,7 +43,7 @@ for t in t_range
     vx_values = [vx_custom(x, y, t, T) for (x, y) in grid_points]
     vy_values = [vy_custom(x, y, t, T) for (x, y) in grid_points]
     
-    quiver_plot = plot(xlim=(-10,10), ylim=(-10,10), xlabel="x", ylabel="y", title="Pole Wektorowe dla t = $t, T = $T", legend=false)
+    quiver_plot = plot(xlim=(-10,10), ylim=(-10,10), xlabel="x", ylabel="y", title="Pole Wektorowe dla t = $t, T = $T", legend=false, bottom_margin = 30px, right_margin = 30px)
     quiver!(quiver_plot, [p[1] for p in grid_points], [p[2] for p in grid_points], quiver=(vx_values, vy_values), color=:blue)
     
     # Dodajemy czarny punkt poruszający się od (-10,0) do punktu docelowego (destx, desty)
@@ -68,9 +69,9 @@ for t in t_range
 
     quiver!(quiver_plot, [x_point], [y_point], quiver=([vx_sum], [vy_sum]), color=:orange, linewidth=2)
 
-    annotate!(quiver_plot, 0.5, -12, text("vx = $vx, vy = $vy", :left, 8))
-    annotate!(quiver_plot, 0.5, -13, text("vx_point = $vx_point, vy_point = $vy_point", :left, 8))
-    annotate!(quiver_plot, 0.5, -14, text("vx_sum = $vx_sum, vy_sum = $vy_sum", :left, 8))
+    annotate!(quiver_plot, 0.5, -12, text("vx = $(round(vx,digits = 3)), vy = $(round(vy,digits = 3))", :left, 8))
+    annotate!(quiver_plot, 0.5, -13, text("vx_point = $(round(vx_point,digits = 3)), vy_point = $(round(vy_point,digits = 3))", :left, 8))
+    annotate!(quiver_plot, 0.5, -14, text("vx_sum = $(round(vx_sum,digits = 3)), vy_sum = $(round(vy_sum,digits = 3))", :left, 8))
 
     push!(quiver_plots, quiver_plot)
 end
