@@ -1,24 +1,35 @@
 include("utils.jl")
 using .Utils
 
+include("field.jl")
+using .Field
+
+
 using Plots
 using Plots.PlotMeasures
 
+
+
+x_min = -10
+x_step = 4
+x_max = 30
+
+y_min = -10
+y_step = 2
+y_max = 30
+
 T = 24
 
-# Funkcje definiujące składowe wektorów
-function vx_custom(x, y, t, T)
-    return (x - 30) / 30 * sin(2 * π * t / T) + (y - 40) / 60
-end
-
-function vy_custom(x, y, t, T)
-    return (0.3 * x + 0.1 * y) * cos(2 * π * t / T)
-end
+t_min = 0
+t_step = 0.5
+t_max = 23.5
 
 # Zakresy dla x, y, t
-x_range = -10:4:30
-y_range = -10:4:30
-t_range = 0:0.5:23.5
+x_range = x_min:x_step:x_max
+
+y_range = y_min:y_step:y_max
+
+t_range = t_min:t_step:t_max
 
 # Generowanie punktów siatki
 grid_points = collect(Iterators.product(x_range, y_range))
@@ -39,60 +50,46 @@ end
 # Wczytaj cel
 destx, desty = customDestination()
 vs_speed = 3.0
-println("Współrzędne celu: x = $destx, y = $desty,  vs_speed = $vs_speed")
 
 # Deklaracja zmiennych globalnych
-global x_add = 0
-global y_add = 0
-global x_point = -10
+global x_point = x_min
 global y_point = 0
 global t = -0.5
 # Pętla po zakresie czasu
+println("Start loop")
 while abs(x_point) < abs(destx) || abs(y_point) < abs(desty)
-    
-    global x_add
-    global y_add
     global x_point
     global y_point
     global t
     t += 0.5
-    if t > 24
-        t=0.0
+    if t > 23.5
+        t = 0.0
     end
-    println("T: $t")
-    println("$x_point, $y_point")
 
-    vx_values = [vx_custom(x, y, t, T) for (x, y) in grid_points]
-    vy_values = [vy_custom(x, y, t, T) for (x, y) in grid_points]
+    vx_values = [Field.v_custom(x, y, t, T, "x") for (x, y) in grid_points]
+    vy_values = [Field.v_custom(x, y, t, T, "y") for (x, y) in grid_points]
     
-    quiver_plot = plot(xlim=(-10, 30), ylim=(-10, 30), xlabel="x", ylabel="y", title="Pole Wektorowe dla t = $t, T = $T", legend=false, bottom_margin=30px, right_margin=30px)
+    quiver_plot = plot(xlim=(x_min, x_max), ylim=(y_min, y_max), xlabel="x", ylabel="y", title="Pole Wektorowe dla t = $t, T = $T", legend=false, bottom_margin=30px, right_margin=30px)
     quiver!(quiver_plot, [p[1] for p in grid_points], [p[2] for p in grid_points], quiver=(vx_values, vy_values), color=:blue)
-
-    x_point = -10 + x_add
-    y_point = y_add
-
     scatter!(quiver_plot, [x_point], [y_point], color=:red, markersize=5)
 
-    quiver!(quiver_plot, [-10], [0], quiver=([destx + 10], [desty]), color=:green, linewidth=2)
+    quiver!(quiver_plot, [x_min], [0], quiver=([destx - x_min], [desty]), color=:green, linewidth=2)
 
     # Obliczanie prędkości w punkcie (x_point, y_point)
-    vx_field = vx_custom(x_point, y_point, t, T)
-    vy_field = vy_custom(x_point, y_point, t, T)
+    vx_field = Field.v_custom(x_point, y_point, t, T, "x")
+    vy_field = Field.v_custom(x_point, y_point, t, T, "y")
 
     # Dodawanie strzałki reprezentującej pole prędkości w danym punkcie
     quiver!(quiver_plot, [x_point], [y_point], quiver=([vx_field], [vy_field]), color=:black, linewidth=2)
 
-    ship_direction = Utils.calculate_ship_direction([vx_field, vy_field], [destx + 10, desty], vs_speed)
+    ship_direction = Utils.calculate_ship_direction([vx_field, vy_field], [destx - x_min, desty], vs_speed)
 
     ship_direction_x, ship_direction_y = ship_direction
 
     quiver!(quiver_plot, [x_point], [y_point], quiver=([ship_direction_x], [ship_direction_y]), color=:magenta, linewidth=2)
-    println("FIELD: $vx_field, $vy_field, DEST: $destx, $desty, SHIP: $ship_direction_x, $ship_direction_y")
 
     vx_sum = ship_direction_x + vx_field
     vy_sum = ship_direction_y + vy_field
-
-    println("SUM: $vx_sum, $vy_sum")
 
     quiver!(quiver_plot, [x_point], [y_point], quiver=([vx_sum], [vy_sum]), color=:orange, linewidth=2)
 
@@ -101,12 +98,8 @@ while abs(x_point) < abs(destx) || abs(y_point) < abs(desty)
     annotate!(quiver_plot, 0.5, -14, text("vx_sum = $(round(vx_sum,digits=3)), vy_sum = $(round(vy_sum,digits=3))", :left, 8))
 
     push!(quiver_plots, quiver_plot)
-    println("ship: $ship_direction_x  $ship_direction_y")
-    x_add += vx_sum
-    y_add += vy_sum
-    println("positions: $(x_add-10.0) $y_add")
-    println("$x_point, $y_point")
-
+    x_point += vx_sum
+    y_point += vy_sum
 end
 
 # Wyświetlenie animacji
