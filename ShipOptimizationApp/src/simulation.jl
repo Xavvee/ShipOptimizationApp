@@ -1,5 +1,14 @@
 module Simulation
 
+include("field.jl")
+using .Field
+
+include("utils.jl")
+using .Utils
+
+
+using Plots
+using Plots.PlotMeasures
 
 # Funkcja do uzyskania celu od użytkownika
 function custom_destination()
@@ -18,7 +27,7 @@ end
 function initialize_quiver_plot(x_range, y_range, t, T, grid_points, vx_values, vy_values, x_point, y_point, destx, desty)
 
     x_min, x_max = first(x_range), last(x_range)
-    y_min, y_max = first(y_range), last(y_max)
+    y_min, y_max = first(y_range), last(y_range)
 
     quiver_plot = plot(xlim=(x_min, x_max), ylim=(y_min, y_max), xlabel="x", ylabel="y", title="Pole Wektorowe dla t = $t, T = $T", legend=false, bottom_margin=30px, right_margin=30px)
     
@@ -78,7 +87,7 @@ function simulate(x_range, y_range, T)
         # Dodawanie strzałki reprezentującej pole prędkości w danym punkcie
         quiver!(quiver_plot, [x_point], [y_point], quiver=([vx_field], [vy_field]), color=:black, linewidth=2)
 
-        ship_direction = Utils.calculate_ship_direction([vx_field, vy_field], [destx - x_min, desty], vs_speed)
+        ship_direction = Utils.calculate_ship_direction([vx_field, vy_field], [destx - first(x_range), desty], vs_speed)
 
         ship_direction_x, ship_direction_y = ship_direction
 
@@ -96,8 +105,8 @@ function simulate(x_range, y_range, T)
         push!(quiver_plots, quiver_plot)
         x_point += vx_sum
         y_point += vy_sum
-    return quiver_plots
     end
+    return quiver_plots
 end
     
 end

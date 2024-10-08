@@ -1,9 +1,3 @@
-include("utils.jl")
-using .Utils
-
-include("field.jl")
-using .Field
-
 include("display.jl")
 using .Display
 
@@ -25,4 +19,8 @@ quiver_plots = Simulation.simulate(x_range, y_range, T)
 
 # Wyświetlenie animacji
 
-Display.display(quiver_plots)
+anim = Display.display_simulation(quiver_plots)
+
+
+gif(anim, "vector_field.gif", fps=3)
+
