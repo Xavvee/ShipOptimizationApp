@@ -79,13 +79,13 @@ module Graph
     end
 
     # Example usage
-    x_start, y_start = 2, 7
-    x_finish, y_finish = 16, 19
-    k = 8    # Number of segments (k+1 points)
-    max_l = 9  # Maximum number of points on both sides for the middle point
-    m = 0.7  # Distance of points from the line
-    multiplier = 2
+    # x_start, y_start = 2, 7
+    # x_finish, y_finish = 16, 19
+    # k = 8    # Number of segments (k+1 points)
+    # max_l = 9  # Maximum number of points on both sides for the middle point
+    # m = 0.7  # Distance of points from the line
+    # multiplier = 2
 
-    plot_points(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
+    # plot_points(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
 
 end
