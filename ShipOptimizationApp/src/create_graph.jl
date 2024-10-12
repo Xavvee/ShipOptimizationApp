@@ -79,7 +79,7 @@ module CreateGraph
 end
 
 
-# # Example usage
+# Example usage
 # x_start, y_start = 2, 7
 # x_finish, y_finish = 16, 19
 # k = 4  # Number of segments (k+1 points)

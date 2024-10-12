@@ -9,6 +9,8 @@ using .Utils
 include("create_graph.jl")
 using .CreateGraph
 
+include("paths.jl")
+using .Paths
 
 using Plots
 using Plots.PlotMeasures
@@ -32,7 +34,6 @@ function initialize_quiver_plot(x_range, y_range, t, T, grid_points, vx_values, 
     
     # Mark the ship's position
     scatter!(quiver_plot, [x_curr], [y_curr], color=:red, markersize=5)
-    
     # Plot the graph edges
     for e in edges(g)
         # Get source and destination nodes from the edge
@@ -64,69 +65,83 @@ end
 
 function simulate(x_range, y_range, T)
     println("Start loop")
-    # Wczytaj cel
-    # println("Wczytaj punkty początkowe: ")
-    # global x_start, y_start = Field.custom_destination()
-    # println("Wczytaj punkty końcowe: ")
-    # x_finish, y_finish = Field.custom_destination()
-    
-    global x_start, y_start, x_finish, y_finish = -7.0, 17.0, 26.0, -9.0
-    
-    vs_speed = 3.0
-    # Inicjalizacja listy przechowującej wektory
-    quiver_plots = []
 
+    global x_start, y_start, x_finish, y_finish = -7.0, 17.0, 26.0, -9.0
+    vs_speed = 3.0
+    quiver_plots = []
     global x_curr, y_curr = x_start, y_start
 
-    # Generowanie punktów siatki
+    # Generating grid points
     grid_points = collect(Iterators.product(x_range, y_range))
 
     global t = -0.5
     
-    g, node_positions = CreateGraph.generate_graph(x_start, y_start, x_finish, y_finish, 4, 5, 2 ,3)
+    g, node_positions = CreateGraph.generate_graph(x_start, y_start, x_finish, y_finish, 4, 5, 2, 3)
+    path = Paths.find_random_path((g, node_positions))
+
+    # Start with the first node in the path
+    current_node_index = 1
+    current_node = path[current_node_index]
+    
+    # Get the coordinates for the starting node
+    x_curr, y_curr = node_positions[current_node]
 
     # Pętla po zakresie czasu
-    while abs(x_curr) < abs(x_finish) || abs(y_curr) < abs(y_finish)
-        global x_curr, y_curr, x_start, y_start
+    while current_node_index < length(path)
         global t
         t += 0.5
         if t > 23.5
             t = 0.0
         end
 
+        # Initialize the velocity field
         vx_values, vy_values = calculate_velocity_field(grid_points, t, T)
         
         # Initialize plot
         quiver_plot = initialize_quiver_plot(x_range, y_range, t, T, grid_points, vx_values, vy_values, x_curr, y_curr, g, node_positions)
 
-        # Obliczanie prędkości w punkcie (x_start, y_start)
+        # Calculate speed at the current node
         vx_field = Field.v_custom(x_curr, y_curr, t, T, "x")
         vy_field = Field.v_custom(x_curr, y_curr, t, T, "y")
 
-        # Dodawanie strzałki reprezentującej pole prędkości w danym punkcie
+        # Add velocity field vector
         quiver!(quiver_plot, [x_curr], [y_curr], quiver=([vx_field], [vy_field]), color=:black, linewidth=2)
 
-        ship_direction = Utils.calculate_ship_direction([vx_field, vy_field], [x_finish - x_start, y_finish - y_start], vs_speed)
+        # Calculate direction to the next node
+        if current_node_index < length(path)
+            next_node = path[current_node_index + 1]
+            next_x, next_y = node_positions[next_node]
 
-        ship_direction_x, ship_direction_y = ship_direction
+            # Calculate the direction vector
+            direction_x = next_x - x_curr
+            direction_y = next_y - y_curr
+            norm = sqrt(direction_x^2 + direction_y^2)
 
-        quiver!(quiver_plot, [x_curr], [y_curr], quiver=([ship_direction_x], [ship_direction_y]), color=:magenta, linewidth=2)
+            # Move the ship towards the next node, normalized by speed
+            if norm > 0
+                x_curr += (direction_x / norm) * vs_speed
+                y_curr += (direction_y / norm) * vs_speed
+            end
 
-        vx_sum = ship_direction_x + vx_field
-        vy_sum = ship_direction_y + vy_field
+            println("Current positions: x_curr = $x_curr, y_curr = $y_curr")
+            println("CUrrent node index:  $current_node_index")
+            println("Norm $norm")
+            println("vs speed $vs_speed")
+            
+            # Check if the ship has reached the next node (within a small threshold)
+            if norm < vs_speed
+                println("HELLO")
+                current_node_index += 1  # Move to the next node in the path
+            end
+        end
 
-        quiver!(quiver_plot, [x_curr], [y_curr], quiver=([vx_sum], [vy_sum]), color=:orange, linewidth=2)
-
-        annotate!(quiver_plot, 0.5, -12, text("vx = $(round(ship_direction_x,digits=3)), vy = $(round(ship_direction_y,digits=3))", :left, 8))
-        annotate!(quiver_plot, 0.5, -13, text("vx_field = $(round(vx_field,digits=3)), vy_field = $(round(vy_field,digits=3))", :left, 8))
-        annotate!(quiver_plot, 0.5, -14, text("vx_sum = $(round(vx_sum,digits=3)), vy_sum = $(round(vy_sum,digits=3))", :left, 8))
-
+        # Store plot for the current position
         push!(quiver_plots, quiver_plot)
-        x_curr += vx_sum
-        y_curr += vy_sum
     end
+
     return quiver_plots
 end
+
     
 end
 
