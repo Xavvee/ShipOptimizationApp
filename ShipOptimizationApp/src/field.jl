@@ -9,4 +9,13 @@ function v_custom(x, y, t, T, coordinate)
     end
 end
 
+function custom_destination()
+    print("Wprowadź wartości x i y oddzielone spacją: ")
+    inputs = split(readline())
+    
+    x = parse(Float64, inputs[1])
+    y = parse(Float64, inputs[2])
+    return x, y
+end
+
 end
