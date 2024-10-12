@@ -20,7 +20,7 @@ function create_custom_range(range_min, range_step, range_max)
     return range_min:range_step:range_max
 end
 
-function initialize_quiver_plot(x_range, y_range, t, T, grid_points, vx_values, vy_values, x_start, y_start, x_finish, y_finish, x_curr, y_curr, g, node_positions)
+function initialize_quiver_plot(x_range, y_range, t, T, grid_points, vx_values, vy_values, x_curr, y_curr, g, node_positions)
 
     x_min, x_max = first(x_range), last(x_range)
     y_min, y_max = first(y_range), last(y_range)
@@ -49,7 +49,7 @@ function initialize_quiver_plot(x_range, y_range, t, T, grid_points, vx_values, 
 
     # Plot the graph nodes
     for (i, (x_i, y_i)) in enumerate(node_positions)
-        scatter!(quiver_plot, [x_i], [y_i], color=:black, markersize=5, label=false)
+        scatter!(quiver_plot, [x_i], [y_i], color=:black, markersize=3, label=false)
     end
 
     return quiver_plot
@@ -97,7 +97,7 @@ function simulate(x_range, y_range, T)
         vx_values, vy_values = calculate_velocity_field(grid_points, t, T)
         
         # Initialize plot
-        quiver_plot = initialize_quiver_plot(x_range, y_range, t, T, grid_points, vx_values, vy_values, x_start, y_start, x_finish, y_finish, x_curr, y_curr, g, node_positions)
+        quiver_plot = initialize_quiver_plot(x_range, y_range, t, T, grid_points, vx_values, vy_values, x_curr, y_curr, g, node_positions)
 
         # Obliczanie prędkości w punkcie (x_start, y_start)
         vx_field = Field.v_custom(x_curr, y_curr, t, T, "x")
