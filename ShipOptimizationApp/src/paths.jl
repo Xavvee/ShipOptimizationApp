@@ -6,8 +6,6 @@ using .CreateGraph
 using LightGraphs
 
     function find_random_path(g)
-        print(g)
-
         graph = g[1]
         path = []
         current = 1

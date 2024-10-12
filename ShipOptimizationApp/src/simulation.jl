@@ -65,7 +65,7 @@ end
 
 function simulate(x_range, y_range, T)
     println("Start loop")
-
+    
     global x_start, y_start, x_finish, y_finish = -7.0, 17.0, 26.0, -9.0
     vs_speed = 3.0
     quiver_plots = []
@@ -86,7 +86,7 @@ function simulate(x_range, y_range, T)
     # Get the coordinates for the starting node
     x_curr, y_curr = node_positions[current_node]
 
-    # Pętla po zakresie czasu
+    # Main loop to simulate the ship's movement
     while current_node_index < length(path)
         global t
         t += 0.5
@@ -100,41 +100,66 @@ function simulate(x_range, y_range, T)
         # Initialize plot
         quiver_plot = initialize_quiver_plot(x_range, y_range, t, T, grid_points, vx_values, vy_values, x_curr, y_curr, g, node_positions)
 
-        # Calculate speed at the current node
+        # Calculate speed at the current position
         vx_field = Field.v_custom(x_curr, y_curr, t, T, "x")
         vy_field = Field.v_custom(x_curr, y_curr, t, T, "y")
 
         # Add velocity field vector
         quiver!(quiver_plot, [x_curr], [y_curr], quiver=([vx_field], [vy_field]), color=:black, linewidth=2)
 
-        # Calculate direction to the next node
+        # Check if there's a next node
         if current_node_index < length(path)
             next_node = path[current_node_index + 1]
             next_x, next_y = node_positions[next_node]
 
-            # Calculate the direction vector
+            # Calculate direction to the next node
             direction_x = next_x - x_curr
             direction_y = next_y - y_curr
             norm = sqrt(direction_x^2 + direction_y^2)
 
-            # Move the ship towards the next node, normalized by speed
-            if norm > 0
-                x_curr += (direction_x / norm) * vs_speed
-                y_curr += (direction_y / norm) * vs_speed
-            end
+            # Calculate ship direction and speed using the Utils function
+            ship_direction = Utils.calculate_ship_direction([vx_field, vy_field], [direction_x, direction_y], vs_speed)
+            ship_direction_x, ship_direction_y = ship_direction
 
-            println("Current positions: x_curr = $x_curr, y_curr = $y_curr")
-            println("CUrrent node index:  $current_node_index")
-            println("Norm $norm")
-            println("vs speed $vs_speed")
+
+            quiver!(quiver_plot, [x_curr], [y_curr], quiver=([ship_direction_x], [ship_direction_y]), color=:magenta, linewidth=2)
+
+            vx_sum = vx_field + ship_direction_x
+            vy_sum = vy_field + ship_direction_y
+            v_sum_norm = sqrt(vx_sum^2 + vy_sum^2)
+            # Normalize movement towards the next node
+            quiver!(quiver_plot, [x_curr], [y_curr], quiver=([vx_sum], [vy_sum]), color=:orange, linewidth=2)
+
+            if norm > 0
+                # Calculate how far the ship can move towards the next node without overshooting
+                if(norm < v_sum_norm)
+                    remaining_percentage = 1 - (norm/v_sum_norm)
+                    println("Po drugiej stronie: $remaining_percentage")
+                    x_curr = next_x
+                    y_curr = next_y
+                    if current_node_index < length(path) - 1
+                        tmp_next_x, tmp_next_y = node_positions[path[current_node_index + 2]]
+                        tmp_direction_x = tmp_next_x - x_curr
+                        tmp_direction_y = tmp_next_y - y_curr
+                        println("tmp x: $tmp_direction_x tmp y $tmp_direction_y")
+                        ship_direction = Utils.calculate_ship_direction([vx_field, vy_field], [tmp_direction_x, tmp_direction_y], vs_speed)
+                        ship_direction_x, ship_direction_y = ship_direction
+                        vx_sum = vx_field + ship_direction_x
+                        vy_sum = vy_field + ship_direction_y
+                        x_curr += (vx_sum )*remaining_percentage
+                        y_curr += (vy_sum )*remaining_percentage
+                    end
+                    current_node_index += 1
+                else
+                    # Update current position of the ship
+                    x_curr += vx_sum 
+                    y_curr += vy_sum 
+                end
+                
             
-            # Check if the ship has reached the next node (within a small threshold)
-            if norm < vs_speed
-                println("HELLO")
-                current_node_index += 1  # Move to the next node in the path
             end
         end
-
+        
         # Store plot for the current position
         push!(quiver_plots, quiver_plot)
     end
@@ -142,6 +167,5 @@ function simulate(x_range, y_range, T)
     return quiver_plots
 end
 
-    
-end
 
+end
