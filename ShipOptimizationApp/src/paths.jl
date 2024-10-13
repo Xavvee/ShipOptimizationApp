@@ -1,7 +1,7 @@
 module Paths
 
-include("create_graph.jl")
-using .CreateGraph
+# include("create_graph.jl")
+# using .Create_Graph
 
 using LightGraphs
 
@@ -30,4 +30,4 @@ using LightGraphs
 
 end
 
-# println(Paths.find_random_path(CreateGraph.generate_graph( 2, 7, 16, 19, 4, 5, 2, 3)))
+# println(Paths.find_random_path(Create_Graph.generate_graph( 2, 7, 16, 19, 4, 5, 2, 3)))

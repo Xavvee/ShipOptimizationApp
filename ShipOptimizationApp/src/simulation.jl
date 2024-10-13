@@ -7,10 +7,13 @@ include("utils.jl")
 using .Utils
 
 include("create_graph.jl")
-using .CreateGraph
+using .Create_Graph
 
 include("paths.jl")
 using .Paths
+
+include("time_generator.jl")
+using .Time_Generator
 
 using Plots
 using Plots.PlotMeasures
@@ -22,12 +25,12 @@ function create_custom_range(range_min, range_step, range_max)
     return range_min:range_step:range_max
 end
 
-function initialize_quiver_plot(x_range, y_range, t, T, grid_points, vx_values, vy_values, x_curr, y_curr, g, node_positions)
+function initialize_quiver_plot(x_range, y_range, time, T, grid_points, vx_values, vy_values, x_curr, y_curr, g, node_positions)
 
     x_min, x_max = first(x_range), last(x_range)
     y_min, y_max = first(y_range), last(y_range)
 
-    quiver_plot = plot(xlim=(x_min, x_max), ylim=(y_min, y_max), xlabel="x", ylabel="y", title="Pole Wektorowe dla t = $t, T = $T", legend=false, bottom_margin=30px, right_margin=30px)
+    quiver_plot = plot(xlim=(x_min, x_max), ylim=(y_min, y_max), xlabel="x", ylabel="y", title="Pole Wektorowe dla time = $time, T = $T", legend=false, bottom_margin=30px, right_margin=30px)
     
     # Plot the velocity field
     quiver!(quiver_plot, [p[1] for p in grid_points], [p[2] for p in grid_points], quiver=(vx_values, vy_values), color=:blue)
@@ -49,7 +52,7 @@ function initialize_quiver_plot(x_range, y_range, t, T, grid_points, vx_values, 
     end
 
     # Plot the graph nodes
-    for (i, (x_i, y_i)) in enumerate(node_positions)
+    for (_, (x_i, y_i)) in enumerate(node_positions)
         scatter!(quiver_plot, [x_i], [y_i], color=:black, markersize=3, label=false)
     end
 
@@ -57,9 +60,9 @@ function initialize_quiver_plot(x_range, y_range, t, T, grid_points, vx_values, 
 end
 
 
-function calculate_velocity_field(grid_points, t, T)
-    vx_values = [Field.v_custom(x, y, t, T, "x") for (x, y) in grid_points]
-    vy_values = [Field.v_custom(x, y, t, T, "y") for (x, y) in grid_points]
+function calculate_velocity_field(grid_points, time, T)
+    vx_values = [Field.v_custom(x, y, time, T, "x") for (x, y) in grid_points]
+    vy_values = [Field.v_custom(x, y, time, T, "y") for (x, y) in grid_points]
     return vx_values, vy_values
 end
 
@@ -74,9 +77,9 @@ function simulate(x_range, y_range, T)
     # Generating grid points
     grid_points = collect(Iterators.product(x_range, y_range))
 
-    global t = -0.5
+    global time_generator = Time_Generator.TimeGenerator(0.0)
     
-    g, node_positions = CreateGraph.generate_graph(x_start, y_start, x_finish, y_finish, 4, 5, 2, 3)
+    g, node_positions = Create_Graph.generate_graph(x_start, y_start, x_finish, y_finish, 4, 5, 2, 3)
     path = Paths.find_random_path((g, node_positions))
 
     # Start with the first node in the path
@@ -88,21 +91,24 @@ function simulate(x_range, y_range, T)
 
     # Main loop to simulate the ship's movement
     while current_node_index < length(path)
-        global t
-        t += 0.5
-        if t > 23.5
-            t = 0.0
+       
+        time_generated = Time_Generator.iterate(time_generator)
+        
+        if time_generated === nothing
+            break
         end
+    
+        time, time_generator = time_generated
 
         # Initialize the velocity field
-        vx_values, vy_values = calculate_velocity_field(grid_points, t, T)
+        vx_values, vy_values = calculate_velocity_field(grid_points, time, T)
         
         # Initialize plot
-        quiver_plot = initialize_quiver_plot(x_range, y_range, t, T, grid_points, vx_values, vy_values, x_curr, y_curr, g, node_positions)
+        quiver_plot = initialize_quiver_plot(x_range, y_range, time, T, grid_points, vx_values, vy_values, x_curr, y_curr, g, node_positions)
 
         # Calculate speed at the current position
-        vx_field = Field.v_custom(x_curr, y_curr, t, T, "x")
-        vy_field = Field.v_custom(x_curr, y_curr, t, T, "y")
+        vx_field = Field.v_custom(x_curr, y_curr, time, T, "x")
+        vy_field = Field.v_custom(x_curr, y_curr, time, T, "y")
 
         # Add velocity field vector
         quiver!(quiver_plot, [x_curr], [y_curr], quiver=([vx_field], [vy_field]), color=:black, linewidth=2)

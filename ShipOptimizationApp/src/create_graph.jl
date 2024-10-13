@@ -1,4 +1,4 @@
-module CreateGraph
+module Create_Graph
 
     include("graph.jl")
     using .Graph
@@ -87,5 +87,5 @@ end
 # m = 2 # Distance of points from the line
 # multiplier = 3  # Controls the decrease of points towards the edges
 
-# g, node_positions = CreateGraph.generate_graph(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
-# CreateGraph.plot_graph(g, node_positions)
+# g, node_positions = Create_Graph.generate_graph(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
+# Create_Graph.plot_graph(g, node_positions)
