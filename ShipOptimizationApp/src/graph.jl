@@ -22,7 +22,6 @@ module Graph
 
         # Calculate the middle index of the line
         middle_index = Int(floor(k / 2))
-
         for (i, (x_i, y_i)) in enumerate(points_on_line)
             side_points = []
             push!(side_points, (x_i, y_i))
@@ -46,7 +45,7 @@ module Graph
             push!(all_points, side_points)
         end
         
-        return all_points
+        return all_points, middle_index 
     end
 
     # Function to plot points

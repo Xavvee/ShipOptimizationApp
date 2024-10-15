@@ -9,8 +9,7 @@ module Create_Graph
     # Function to generate points and create a directed graph
     function generate_graph(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
         # Generate the points
-        all_points = Graph.generate_points(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
-
+        all_points, middle_index = Graph.generate_points(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
         # Create a directed graph
         flattened_points = vcat(all_points...)
 
@@ -44,13 +43,13 @@ module Create_Graph
             end
         end
 
-        return g, node_positions
+        return g, node_positions, middle_index
     end
 
     function plot_graph(g, node_positions)
         # Extract x and y coordinates from node positions
-        x_coords = [x for (x, y) in node_positions]
-        y_coords = [y for (x, y) in node_positions]
+        x_coords = [x for (x, _) in node_positions]
+        y_coords = [y for (_, y) in node_positions]
         
         # Plot the nodes
         scatter(x_coords, y_coords, label="Nodes", color=:blue, legend=:topright)

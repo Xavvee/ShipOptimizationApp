@@ -83,9 +83,13 @@ function simulate(x_range, y_range, T)
     grid_points = collect(Iterators.product(x_range, y_range))
 
     global time_generator = Time_Generator.TimeGenerator(0.0)
-    
-    g, node_positions = Create_Graph.generate_graph(x_start, y_start, x_finish, y_finish, 4, 5, 2, 3)
-    path = Paths.find_random_path((g, node_positions))
+    max_l = 5
+    multiplier = 4
+    g, node_positions, middle_index = Create_Graph.generate_graph(x_start, y_start, x_finish, y_finish, 9, max_l, 2, multiplier)
+
+    # path = Paths.find_random_path(g)
+    # path = Paths.find_right_path(g, max_l,multiplier, middle_index)
+    path = Paths.find_left_path(g, max_l,multiplier, middle_index)
 
     # Start with the first node in the path
     current_node_index = 1
