@@ -15,6 +15,9 @@ using .Paths
 include("time_generator.jl")
 using .Time_Generator
 
+include("ship.jl")
+using .Ship_Module
+
 using Plots
 using Plots.PlotMeasures
 using LightGraphs
@@ -70,9 +73,11 @@ function simulate(x_range, y_range, T)
     println("Start loop")
     
     global x_start, y_start, x_finish, y_finish = -7.0, 17.0, 26.0, -9.0
-    vs_speed = 3.0
+    max_speed = 3.0
     quiver_plots = []
-    global x_curr, y_curr = x_start, y_start
+
+    # Tworzenie obiektu klasy Ship z uwzględnieniem pozycji startowej i końcowej
+    ship = Ship_Module.Ship(x_start, y_start, x_finish, y_finish, max_speed)
 
     # Generating grid points
     grid_points = collect(Iterators.product(x_range, y_range))
@@ -84,82 +89,72 @@ function simulate(x_range, y_range, T)
 
     # Start with the first node in the path
     current_node_index = 1
-    current_node = path[current_node_index]
-    
-    # Get the coordinates for the starting node
-    x_curr, y_curr = node_positions[current_node]
+    # current_node = path[current_node_index]
 
     # Main loop to simulate the ship's movement
     while current_node_index < length(path)
-       
         time_generated = Time_Generator.iterate(time_generator)
-        
         if time_generated === nothing
             break
         end
-    
         time, time_generator = time_generated
 
         # Initialize the velocity field
         vx_values, vy_values = calculate_velocity_field(grid_points, time, T)
         
         # Initialize plot
-        quiver_plot = initialize_quiver_plot(x_range, y_range, time, T, grid_points, vx_values, vy_values, x_curr, y_curr, g, node_positions)
+        quiver_plot = initialize_quiver_plot(x_range, y_range, time, T, grid_points, vx_values, vy_values, ship.position_x, ship.position_y, g, node_positions)
 
         # Calculate speed at the current position
-        vx_field = Field.v_custom(x_curr, y_curr, time, T, "x")
-        vy_field = Field.v_custom(x_curr, y_curr, time, T, "y")
+        Ship_Module.update_field_speed!(ship, Field.v_custom(ship.position_x, ship.position_y, time, T, "x"), Field.v_custom(ship.position_x, ship.position_y, time, T, "y"))
 
         # Add velocity field vector
-        quiver!(quiver_plot, [x_curr], [y_curr], quiver=([vx_field], [vy_field]), color=:black, linewidth=2)
+        quiver!(quiver_plot, [ship.position_x], [ship.position_y], quiver=([ship.field_speed_x], [ship.field_speed_y]), color=:black, linewidth=2)
 
         # Check if there's a next node
         if current_node_index < length(path)
-            next_node = path[current_node_index + 1]
-            next_x, next_y = node_positions[next_node]
+            # next_node = path[current_node_index + 1]
+            next_x, next_y = node_positions[path[current_node_index + 1]]
 
             # Calculate direction to the next node
-            direction_x = next_x - x_curr
-            direction_y = next_y - y_curr
+            direction_x = next_x - ship.position_x
+            direction_y = next_y - ship.position_y
             norm = sqrt(direction_x^2 + direction_y^2)
 
             # Calculate ship direction and speed using the Utils function
-            ship_direction = Utils.calculate_ship_direction([vx_field, vy_field], [direction_x, direction_y], vs_speed)
-            ship_direction_x, ship_direction_y = ship_direction
+            ship_direction_x, ship_direction_y = Utils.calculate_ship_direction([ship.field_speed_x, ship.field_speed_y], [direction_x, direction_y], ship.max_speed)
+            Ship_Module.update_ship_speed!(ship, ship_direction_x, ship_direction_y)
 
 
-            quiver!(quiver_plot, [x_curr], [y_curr], quiver=([ship_direction_x], [ship_direction_y]), color=:magenta, linewidth=2)
+            quiver!(quiver_plot, [ship.position_x], [ship.position_y], quiver=([ship.ship_speed_x], [ship.ship_speed_y]), color=:magenta, linewidth=2)
 
-            vx_sum = vx_field + ship_direction_x
-            vy_sum = vy_field + ship_direction_y
-            v_sum_norm = sqrt(vx_sum^2 + vy_sum^2)
-            # Normalize movement towards the next node
-            quiver!(quiver_plot, [x_curr], [y_curr], quiver=([vx_sum], [vy_sum]), color=:orange, linewidth=2)
+            Ship_Module.update_resultant_speed!(ship)
+            quiver!(quiver_plot, [ship.position_x], [ship.position_y], quiver=([ship.resultant_speed_x], [ship.resultant_speed_y]), color=:orange, linewidth=2)
+            v_sum_norm = sqrt(ship.resultant_speed_x^2 + ship.resultant_speed_y^2)
 
             if norm > 0
                 # Calculate how far the ship can move towards the next node without overshooting
                 if(norm < v_sum_norm)
                     remaining_percentage = 1 - (norm/v_sum_norm)
-                    println("Po drugiej stronie: $remaining_percentage")
-                    x_curr = next_x
-                    y_curr = next_y
+                    # println("Po drugiej stronie: $remaining_percentage")
+                    ship.position_x = next_x
+                    ship.position_y = next_y
                     if current_node_index < length(path) - 1
                         tmp_next_x, tmp_next_y = node_positions[path[current_node_index + 2]]
-                        tmp_direction_x = tmp_next_x - x_curr
-                        tmp_direction_y = tmp_next_y - y_curr
-                        println("tmp x: $tmp_direction_x tmp y $tmp_direction_y")
-                        ship_direction = Utils.calculate_ship_direction([vx_field, vy_field], [tmp_direction_x, tmp_direction_y], vs_speed)
-                        ship_direction_x, ship_direction_y = ship_direction
-                        vx_sum = vx_field + ship_direction_x
-                        vy_sum = vy_field + ship_direction_y
-                        x_curr += (vx_sum )*remaining_percentage
-                        y_curr += (vy_sum )*remaining_percentage
+                        tmp_direction_x = tmp_next_x - ship.position_x
+                        tmp_direction_y = tmp_next_y - ship.position_y
+                        # println("tmp x: $tmp_direction_x tmp y $tmp_direction_y")
+                        ship_direction_x, ship_direction_y = Utils.calculate_ship_direction([ship.field_speed_x, ship.field_speed_y], [tmp_direction_x, tmp_direction_y], ship.max_speed)
+                        Ship_Module.update_ship_speed!(ship, ship_direction_x, ship_direction_y)
+                        Ship_Module.update_resultant_speed!(ship)
+                        
+                        ship.position_x += (ship.resultant_speed_x)*remaining_percentage
+                        ship.position_y += (ship.resultant_speed_y)*remaining_percentage
                     end
                     current_node_index += 1
                 else
                     # Update current position of the ship
-                    x_curr += vx_sum 
-                    y_curr += vy_sum 
+                    Ship_Module.move!(ship)
                 end
                 
             
