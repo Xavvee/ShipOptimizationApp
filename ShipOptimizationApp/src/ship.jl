@@ -14,8 +14,11 @@ module Ship_Module
         resultant_speed_x::Float64
         resultant_speed_y::Float64
 
-        function Ship(position_x::Float64, position_y::Float64, finish_x::Float64, finish_y::Float64, max_speed::Float64)
-            new(position_x, position_y, finish_x, finish_y, max_speed, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        path::Vector{Int}
+        current_node_index::Int
+
+        function Ship(position_x::Float64, position_y::Float64, finish_x::Float64, finish_y::Float64, max_speed::Float64, path::Vector{Int})
+            new(position_x, position_y, finish_x, finish_y, max_speed, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, path, 1)
         end
     end
 

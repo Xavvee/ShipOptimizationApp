@@ -6,7 +6,7 @@ module Paths
 using LightGraphs
 
     function find_random_path(graph)
-        path = []
+        path = Vector{Int}() 
         current = 1
         finish = nv(graph)
         while current != finish
@@ -25,8 +25,9 @@ using LightGraphs
         return path
     end
 
+
     function find_left_path(graph, max_l, multiplier, middle_index)
-        path = []
+        path = Vector{Int}() 
         current = 1
         finish = nv(graph)
         i = 0
@@ -65,7 +66,7 @@ using LightGraphs
     end
 
     function find_right_path(graph, max_l, multiplier, middle_index)
-        path = []
+        path = Vector{Int}() 
         current = 1
         finish = nv(graph)
         i = 0
