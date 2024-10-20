@@ -29,7 +29,6 @@ function create_custom_range(range_min, range_step, range_max)
 end
 
 function initialize_quiver_plot(x_range, y_range, time, T, grid_points, vx_values, vy_values, x_curr, y_curr, g, node_positions)
-
     x_min, x_max = first(x_range), last(x_range)
     y_min, y_max = first(y_range), last(y_range)
 
@@ -38,8 +37,20 @@ function initialize_quiver_plot(x_range, y_range, time, T, grid_points, vx_value
     # Plot the velocity field
     quiver!(quiver_plot, [p[1] for p in grid_points], [p[2] for p in grid_points], quiver=(vx_values, vy_values), color=:blue)
     
-    # Mark the ship's position
-    scatter!(quiver_plot, [x_curr], [y_curr], color=:red, markersize=5)
+    # Rysowanie wykresu
+    scatter!(quiver_plot, x_curr, y_curr, color=:red, markersize=8)
+    
+    labels = ["$i" for i in 1:length(x_curr)]  # Tworzenie etykiet dla każdego statku
+    
+    # Definiowanie przesunięcia (dostosuj te wartości w zależności od potrzeb)
+    dx = 1
+    dy = 1
+
+    # Dodawanie etykiet do każdego punktu
+    for (x, y, label) in zip(x_curr, y_curr, labels)
+        annotate!(quiver_plot, x + dx, y + dy, text(label, 10, :black))
+    end
+
     # Plot the graph edges
     for e in edges(g)
         # Get source and destination nodes from the edge
@@ -82,22 +93,23 @@ function simulate(x_range, y_range, T, num_ships)
 
     # Initialize a time generator
     global time_generator = Time_Generator.TimeGenerator(0.0)
-    max_l = 5
-    multiplier = 4
-    g, node_positions, middle_index = Create_Graph.generate_graph(x_start, y_start, x_finish, y_finish, 9, max_l, 2, multiplier)
+    max_l = 6
+    multiplier = 2
+    g, node_positions, middle_index = Create_Graph.generate_graph(x_start, y_start, x_finish, y_finish, 6
+    , max_l, 2.5, multiplier)
 
     # Create multiple ships with different pathfinding techniques
     ships = []
     for i in 1:num_ships
         if i == 1
-            # Use random pathfinding for the first ship
-            path = Paths.find_random_path(g)
-        elseif i == 2
             # Use right pathfinding for the second ship
             path = Paths.find_right_path(g, max_l, multiplier, middle_index)
-        elseif i == 3
+        elseif i == 2
             # Use another custom pathfinding method for the third ship
-            path = Paths.find_left_path(g, max_l, multiplier, middle_index)
+            path = Paths.find_left_path(g, max_l, multiplier, middle_index)    
+        else
+            # Use random pathfinding for the first ship
+            path = Paths.find_random_path(g)
         end
         ship = Ship_Module.Ship(x_start, y_start, x_finish, y_finish, max_speed, path)
 
