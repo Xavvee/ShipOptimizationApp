@@ -102,12 +102,12 @@ function simulate_multiple_ships(x_range, y_range, T)
     time_step = 0.5
 
     # Create multiple ships with different pathfinding techniques
-    num_ships = 3
+    # num_ships = 3
     ships = []
-    for i in 1:num_ships
+    # for i in 1:num_ships
         # if i == 1
             # Use random pathfinding for the first ship
-            path = Paths.find_random_path(g)
+            # path = Paths.find_random_path(g)
         # elseif i == 2
         #     # Use right pathfinding for the second ship
         #     path = Paths.find_right_path(g, max_l, multiplier, middle_index)
@@ -115,26 +115,27 @@ function simulate_multiple_ships(x_range, y_range, T)
         #     # Use another custom pathfinding method for the third ship
         #     path = Paths.find_left_path(g, max_l, multiplier, middle_index)
         # end
-        ship = Ship_Module.Ship(x_start, y_start, x_finish, y_finish, max_speed, path, time_step)
+        # ship = Ship_Module.Ship(x_start, y_start, x_finish, y_finish, max_speed, path, time_step)
 
-        push!(ships, ship)
-    end
-    # path1 = [1, 2, 3, 5, 7, 18, 21, 22, 23, 24]
-    # path2 = [1, 2, 3, 5, 14, 20, 21, 22, 23, 24]
-    # path3 = [1, 2, 3, 5, 15, 19, 21, 22, 23, 24]
+        # push!(ships, ship)
+    # end
+    path1 = [1, 4, 9, 20, 37, 41, 52, 57, 59, 60] #42
+    path2 = [1, 4, 7, 20, 27, 42, 53, 56, 59, 60] #31
+    path3 = [1, 4, 9, 15, 33, 43, 49, 56, 59, 60] #53.5
 
-    # ship1 = Ship_Module.Ship(x_start, y_start, x_finish, y_finish, max_speed, path1, time_step)
-    # ship2 = Ship_Module.Ship(x_start, y_start, x_finish, y_finish, max_speed, path2, time_step)
-    # ship3 = Ship_Module.Ship(x_start, y_start, x_finish, y_finish, max_speed, path3, time_step)
-    # push!(ships, ship1)
-    # push!(ships, ship2)
-    # push!(ships, ship3)
+    ship1 = Ship_Module.Ship(x_start, y_start, x_finish, y_finish, max_speed, path1, time_step)
+    ship2 = Ship_Module.Ship(x_start, y_start, x_finish, y_finish, max_speed, path2, time_step)
+    ship3 = Ship_Module.Ship(x_start, y_start, x_finish, y_finish, max_speed, path3, time_step)
+    push!(ships, ship1)
+    push!(ships, ship2)
+    push!(ships, ship3)
     # Main loop to simulate the movement of all ships
     while any(ship -> ship.current_node_index < length(ship.path), ships)
         time_generated = Time_Generator.iterate(time_generator)
         if time_generated === nothing
             break
         end
+        println("Time generated: ", time_generated)
         time, time_generator = time_generated
 
         # Initialize the velocity field
@@ -148,7 +149,7 @@ function simulate_multiple_ships(x_range, y_range, T)
 
         for ship in ships
 
-            Ship_Module.update_field_speed!(ship, Field.v_custom(ship.position_x, ship.position_y, time, T, "x"), Field.v_custom(ship.position_x, ship.position_y, time, T, "y"))
+            Ship_Module.update_field_speed!(ship, Field.v_custom(ship.position_x, ship.position_y, mod(time, 24), T, "x"), Field.v_custom(ship.position_x, ship.position_y, mod(time,24), T, "y"))
 
             # Add velocity field vector
             quiver!(quiver_plot, [ship.position_x], [ship.position_y], quiver=([ship.field_speed_x], [ship.field_speed_y]), color=:black, linewidth=2)
@@ -199,11 +200,17 @@ function simulate_multiple_ships(x_range, y_range, T)
                     Ship_Module.move!(ship)
                 end
             end
+            ship.finish_time = time
         end
 
         # Store plot for this time step
         push!(quiver_plots, quiver_plot)
     end
+    
+    println("$(ship1.path) -> $(ship1.finish_time)")
+    println("$(ship2.path) -> $(ship2.finish_time)")
+    println("$(ship3.path) -> $(ship3.finish_time)")
+   
 
     return quiver_plots
 end
@@ -231,19 +238,19 @@ function simulate(T)
     end
 
     # Lista do przechowywania obiektów `Task` dla każdego statku
-    start_time = now()
+    # start_time = now()
     tasks = []
     for ship in ships
         # Tworzymy nowy wątek dla każdego statku
         task = Threads.@spawn begin
-            global time_generator = Time_Generator.TimeGenerator(0.0)
-            
+            local time_generator = Time_Generator.TimeGenerator(0.0)
+            local time = 0.0
             while ship.current_node_index < length(ship.path)
                 time_generated = Time_Generator.iterate(time_generator)
                 if time_generated === nothing
                     break
                 end
-                global time, time_generator = time_generated 
+                time, time_generator = time_generated 
 
                 Ship_Module.update_field_speed!(ship, Field.v_custom(ship.position_x, ship.position_y, mod(time, 24), T, "x"), Field.v_custom(ship.position_x, ship.position_y,  mod(time, 24), T, "y"))
 
@@ -270,8 +277,8 @@ function simulate(T)
 
                 if norm > 0
                     # Calculate how far the ship can move towards the next node without overshooting
-                    if(norm < v_sum_norm)
-                        remaining_percentage = 1 - (norm/v_sum_norm)
+                    if(norm < v_sum_norm*time_step)
+                        remaining_percentage = 1 - (norm/(v_sum_norm*time_step))
                         # println("Po drugiej stronie: $remaining_percentage")
                         ship.position_x = next_x
                         ship.position_y = next_y
@@ -284,8 +291,8 @@ function simulate(T)
                             Ship_Module.update_ship_speed!(ship, ship_direction_x, ship_direction_y)
                             Ship_Module.update_resultant_speed!(ship)
                             
-                            ship.position_x += (ship.resultant_speed_x)*remaining_percentage
-                            ship.position_y += (ship.resultant_speed_y)*remaining_percentage
+                            ship.position_x += (ship.resultant_speed_x)*remaining_percentage*time_step
+                            ship.position_y += (ship.resultant_speed_y)*remaining_percentage*time_step
                         end
                         ship.current_node_index += 1
                     else
@@ -306,13 +313,13 @@ function simulate(T)
     end
 
     # Zapisujemy czas zakończenia
-    end_time = now()
-    elapsed_time = end_time - start_time
+    # end_time = now()
+    # elapsed_time = end_time - start_time
 
     for ship in ships
         println("$(ship.path) -> $(ship.finish_time)")
     end
-    println("Czas trwania symulacji: $elapsed_time")
+    # println("Czas trwania symulacji: $elapsed_time")
     return 1
 end
 
