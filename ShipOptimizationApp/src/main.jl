@@ -15,14 +15,14 @@ t_range = Simulation.create_custom_range(0, 0.5, 23.5)
 
 T = 24
 
-# quiver_plots = Simulation.simulate(T)
+quiver_plots = Simulation.simulate(T)
 
-quiver_plots = Simulation.simulate_multiple_ships(x_range, y_range, T)
+# quiver_plots = Simulation.simulate_multiple_ships(x_range, y_range, T)
 
 # Wyświetlenie animacji
 
-anim = Display.display_simulation(quiver_plots)
+# anim = Display.display_simulation(quiver_plots)
 
 
-gif(anim, "vector_field.gif", fps=3)
+# gif(anim, "vector_field.gif", fps=3)
 
