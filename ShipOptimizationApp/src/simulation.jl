@@ -29,7 +29,6 @@ function create_custom_range(range_min, range_step, range_max)
 end
 
 function initialize_quiver_plot(x_range, y_range, time, T, grid_points, vx_values, vy_values, x_curr, y_curr, g, node_positions)
-
     x_min, x_max = first(x_range), last(x_range)
     y_min, y_max = first(y_range), last(y_range)
 
@@ -38,8 +37,20 @@ function initialize_quiver_plot(x_range, y_range, time, T, grid_points, vx_value
     # Plot the velocity field
     quiver!(quiver_plot, [p[1] for p in grid_points], [p[2] for p in grid_points], quiver=(vx_values, vy_values), color=:blue)
     
-    # Mark the ship's position
-    scatter!(quiver_plot, [x_curr], [y_curr], color=:red, markersize=5)
+    # Rysowanie wykresu
+    scatter!(quiver_plot, x_curr, y_curr, color=:red, markersize=8)
+    
+    labels = ["$i" for i in 1:length(x_curr)]  # Tworzenie etykiet dla każdego statku
+    
+    # Definiowanie przesunięcia (dostosuj te wartości w zależności od potrzeb)
+    dx = 1
+    dy = 1
+
+    # Dodawanie etykiet do każdego punktu
+    for (x, y, label) in zip(x_curr, y_curr, labels)
+        annotate!(quiver_plot, x + dx, y + dy, text(label, 10, :black))
+    end
+
     # Plot the graph edges
     for e in edges(g)
         # Get source and destination nodes from the edge
