@@ -16,16 +16,18 @@ module Ship_Module
 
         path::Vector{Int}
         current_node_index::Int
+        finish_time::Float64
+        time_step::Float64
 
-        function Ship(position_x::Float64, position_y::Float64, finish_x::Float64, finish_y::Float64, max_speed::Float64, path::Vector{Int})
-            new(position_x, position_y, finish_x, finish_y, max_speed, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, path, 1)
+        function Ship(position_x::Float64, position_y::Float64, finish_x::Float64, finish_y::Float64, max_speed::Float64, path::Vector{Int}, time_step::Float64)
+            new(position_x, position_y, finish_x, finish_y, max_speed, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, path, 1, 0, time_step)
         end
     end
 
     # Aktualizacja pozycji statku na podstawie składowych prędkości wypadkowej
     function move!(ship::Ship)
-        ship.position_x += ship.resultant_speed_x
-        ship.position_y += ship.resultant_speed_y
+        ship.position_x += ship.resultant_speed_x * ship.time_step
+        ship.position_y += ship.resultant_speed_y * ship.time_step
     end
 
     # Aktualizacja prędkości pola

@@ -69,7 +69,7 @@ function calculate_velocity_field(grid_points, time, T)
     return vx_values, vy_values
 end
 
-function simulate(x_range, y_range, T, num_ships)
+function simulate_multiple_ships(x_range, y_range, T)
     println("Start loop")
     
     # Define start and finish positions
@@ -85,25 +85,35 @@ function simulate(x_range, y_range, T, num_ships)
     max_l = 5
     multiplier = 4
     g, node_positions, middle_index = Create_Graph.generate_graph(x_start, y_start, x_finish, y_finish, 9, max_l, 2, multiplier)
+    time_step = 0.5
 
     # Create multiple ships with different pathfinding techniques
     ships = []
-    for i in 1:num_ships
-        if i == 1
-            # Use random pathfinding for the first ship
-            path = Paths.find_random_path(g)
-        elseif i == 2
-            # Use right pathfinding for the second ship
-            path = Paths.find_right_path(g, max_l, multiplier, middle_index)
-        elseif i == 3
-            # Use another custom pathfinding method for the third ship
-            path = Paths.find_left_path(g, max_l, multiplier, middle_index)
-        end
-        ship = Ship_Module.Ship(x_start, y_start, x_finish, y_finish, max_speed, path)
+    # for i in 1:num_ships
+    #     if i == 1
+    #         # Use random pathfinding for the first ship
+    #         path = Paths.find_random_path(g)
+    #     elseif i == 2
+    #         # Use right pathfinding for the second ship
+    #         path = Paths.find_right_path(g, max_l, multiplier, middle_index)
+    #     elseif i == 3
+    #         # Use another custom pathfinding method for the third ship
+    #         path = Paths.find_left_path(g, max_l, multiplier, middle_index)
+    #     end
+    #     ship = Ship_Module.Ship(x_start, y_start, x_finish, y_finish, max_speed, path, time_step)
 
-        push!(ships, ship)
-    end
+    #     push!(ships, ship)
+    # end
+    path1 = [1, 2, 3, 5, 7, 18, 21, 22, 23, 24]
+    path2 = [1, 2, 3, 5, 14, 20, 21, 22, 23, 24]
+    path3 = [1, 2, 3, 5, 15, 19, 21, 22, 23, 24]
 
+    ship1 = Ship_Module.Ship(x_start, y_start, x_finish, y_finish, max_speed, path1, time_step)
+    ship2 = Ship_Module.Ship(x_start, y_start, x_finish, y_finish, max_speed, path2, time_step)
+    ship3 = Ship_Module.Ship(x_start, y_start, x_finish, y_finish, max_speed, path3, time_step)
+    push!(ships, ship1)
+    push!(ships, ship2)
+    push!(ships, ship3)
     # Main loop to simulate the movement of all ships
     while any(ship -> ship.current_node_index < length(ship.path), ships)
         time_generated = Time_Generator.iterate(time_generator)
@@ -151,6 +161,95 @@ function simulate(x_range, y_range, T, num_ships)
 
             if norm > 0
                 # Calculate how far the ship can move towards the next node without overshooting
+                if(norm < v_sum_norm*ship.time_step)
+                    remaining_percentage = 1 - (norm/(v_sum_norm*ship.time_step))
+                    # println("Po drugiej stronie: $remaining_percentage")
+                    ship.position_x = next_x
+                    ship.position_y = next_y
+                    if ship.current_node_index < length(ship.path) - 1
+                        tmp_next_x, tmp_next_y = node_positions[ship.path[ship.current_node_index + 2]]
+                        tmp_direction_x = tmp_next_x - ship.position_x
+                        tmp_direction_y = tmp_next_y - ship.position_y
+                        # println("tmp x: $tmp_direction_x tmp y $tmp_direction_y")
+                        ship_direction_x, ship_direction_y = Utils.calculate_ship_direction([ship.field_speed_x, ship.field_speed_y], [tmp_direction_x, tmp_direction_y], ship.max_speed)
+                        Ship_Module.update_ship_speed!(ship, ship_direction_x, ship_direction_y)
+                        Ship_Module.update_resultant_speed!(ship)
+                        
+                        ship.position_x += (ship.resultant_speed_x)*remaining_percentage*ship.time_step
+                        ship.position_y += (ship.resultant_speed_y)*remaining_percentage*ship.time_step
+                    end
+                    ship.current_node_index += 1
+                else
+                    # Update current position of the ship
+                    Ship_Module.move!(ship)
+                end
+            end
+        end
+
+        # Store plot for this time step
+        push!(quiver_plots, quiver_plot)
+    end
+
+    return quiver_plots
+end
+
+function simulate(T)
+    println("Start loop")
+
+    global x_start, y_start, x_finish, y_finish = -7.0, 17.0, 26.0, -9.0
+    max_speed = 3.0
+
+
+    
+    max_l = 5
+    multiplier = 4
+    g, node_positions, middle_index = Create_Graph.generate_graph(x_start, y_start, x_finish, y_finish, 9, max_l, 2, multiplier)
+
+    time_step = 0.1
+    ships = []
+
+    for _ in 1:20
+        path = Paths.find_random_path(g)
+        ship = Ship_Module.Ship(x_start, y_start, x_finish, y_finish, max_speed, path, time_step)
+        push!(ships, ship)
+    end
+
+
+    for ship in ships
+        global time_generator = Time_Generator.TimeGenerator(0.0)
+        
+        while ship.current_node_index < length(ship.path)
+            time_generated = Time_Generator.iterate(time_generator)
+            if time_generated === nothing
+                break
+            end
+            global time, time_generator = time_generated 
+
+            Ship_Module.update_field_speed!(ship, Field.v_custom(ship.position_x, ship.position_y, mod(time, 24), T, "x"), Field.v_custom(ship.position_x, ship.position_y,  mod(time, 24), T, "y"))
+
+            # If ship reached the end of its path, continue to next iteration
+            if ship.current_node_index >= length(ship.path)
+                continue
+            end
+
+
+            # Update the ship's movement
+            next_x, next_y = node_positions[ship.path[ship.current_node_index + 1]]
+            direction_x = next_x - ship.position_x
+            direction_y = next_y - ship.position_y
+            norm = sqrt(direction_x^2 + direction_y^2)
+
+            # Calculate ship speed and update positions
+            ship_direction_x, ship_direction_y = Utils.calculate_ship_direction([ship.field_speed_x, ship.field_speed_y], [direction_x, direction_y], ship.max_speed)
+            Ship_Module.update_ship_speed!(ship, ship_direction_x, ship_direction_y)
+
+            Ship_Module.update_resultant_speed!(ship)
+
+
+            v_sum_norm = sqrt(ship.resultant_speed_x^2 + ship.resultant_speed_y^2)
+
+            if norm > 0
+                # Calculate how far the ship can move towards the next node without overshooting
                 if(norm < v_sum_norm)
                     remaining_percentage = 1 - (norm/v_sum_norm)
                     # println("Po drugiej stronie: $remaining_percentage")
@@ -175,12 +274,14 @@ function simulate(x_range, y_range, T, num_ships)
                 end
             end
         end
-
-        # Store plot for this time step
-        push!(quiver_plots, quiver_plot)
+        ship.finish_time = time
     end
 
-    return quiver_plots
+    for ship in ships
+        println("$(ship.path) -> $(ship.finish_time)")
+    end
+
+    return 1
 end
 
 end

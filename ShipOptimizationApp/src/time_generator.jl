@@ -4,15 +4,8 @@ module Time_Generator
     end
 
     function Base.iterate(gen::TimeGenerator, state=gen.t)
-        if state >= 24.0
-            return nothing
-        else
-            next_state = state + 0.5
-            if next_state >= 24.0
-                next_state = 0.0
-            end
-            return (state, TimeGenerator(next_state))
-        end
+        next_state = state + 0.5
+        return (state, TimeGenerator(next_state))
     end
 end
 
