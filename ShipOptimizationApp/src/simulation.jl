@@ -217,7 +217,7 @@ end
 
 
 function simulate(T)
-    println("Start loop")
+    println("Start loop for graph")
 
     global x_start, y_start, x_finish, y_finish = -7.0, 17.0, 26.0, -9.0
     max_speed = 3.0
@@ -279,14 +279,12 @@ function simulate(T)
                     # Calculate how far the ship can move towards the next node without overshooting
                     if(norm < v_sum_norm*time_step)
                         remaining_percentage = 1 - (norm/(v_sum_norm*time_step))
-                        # println("Po drugiej stronie: $remaining_percentage")
                         ship.position_x = next_x
                         ship.position_y = next_y
                         if ship.current_node_index < length(ship.path) - 1
                             tmp_next_x, tmp_next_y = node_positions[ship.path[ship.current_node_index + 2]]
                             tmp_direction_x = tmp_next_x - ship.position_x
                             tmp_direction_y = tmp_next_y - ship.position_y
-                            # println("tmp x: $tmp_direction_x tmp y $tmp_direction_y")
                             ship_direction_x, ship_direction_y = Utils.calculate_ship_direction([ship.field_speed_x, ship.field_speed_y], [tmp_direction_x, tmp_direction_y], ship.max_speed)
                             Ship_Module.update_ship_speed!(ship, ship_direction_x, ship_direction_y)
                             Ship_Module.update_resultant_speed!(ship)
@@ -316,11 +314,29 @@ function simulate(T)
     # end_time = now()
     # elapsed_time = end_time - start_time
 
-    for ship in ships
-        println("$(ship.path) -> $(ship.finish_time)")
-    end
+    # for ship in ships
+    #     println("$(ship.path) -> $(ship.finish_time)")
+    # end
     # println("Czas trwania symulacji: $elapsed_time")
-    return 1
+    return ships
 end
+
+
+function quick_select(ships)
+    n = length(ships)
+    # println(n)
+    
+    # Obliczenie liczby statków, które stanowią 1%
+    k = max(1, div(n, 100))  # Upewniamy się, że k nie jest mniejsze niż 1
+    
+    # Użycie partialsort!, aby znaleźć k największych elementów
+    partialsort!(ships, n-k+1:n, by = s -> s.finish_time, rev=true)
+    
+    # Zmiana rozmiaru wektora, aby usunąć zbędne elementy
+    ships = ships[n-k+1:n]
+    # println("$(length(ships))")
+    return ships
+end
+
 
 end

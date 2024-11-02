@@ -24,7 +24,7 @@ module Create_Graph
         point_to_node = Dict{Tuple{Float64, Float64}, Int}()
         node_positions = []
 
-        for (i, side_points) in enumerate(all_points)
+        for (_, side_points) in enumerate(all_points)
             for point in side_points
                 if !haskey(point_to_node, point)
                     point_to_node[point] = node_counter
@@ -78,7 +78,7 @@ module Create_Graph
 end
 
 
-# Example usage
+# # Example usage
 # x_start, y_start = 2, 7
 # x_finish, y_finish = 16, 19
 # k = 4  # Number of segments (k+1 points)
@@ -88,3 +88,4 @@ end
 
 # g, node_positions = Create_Graph.generate_graph(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
 # Create_Graph.plot_graph(g, node_positions)
+# println(node_positions)

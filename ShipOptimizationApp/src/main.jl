@@ -16,7 +16,11 @@ t_range = Simulation.create_custom_range(0, 0.5, 23.5)
 T = 24
 
 # odpalać na terminalu `julia -t 4`, sprawdazć czy wyświetli odpowiednio - `Threads.nthreads()`
-quiver_plots = Simulation.simulate(T)
+ships = Simulation.simulate(T)
+ships = Simulation.quick_select(ships)
+for ship in ships
+    println("$(ship.path) -> $(ship.finish_time)")
+end
 
 # quiver_plots = Simulation.simulate_multiple_ships(x_range, y_range, T)
 
