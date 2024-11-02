@@ -1,7 +1,10 @@
+
+include("create_graph.jl")
+using .Create_Graph
 module Paths
 
-# include("create_graph.jl")
-# using .Create_Graph
+include("create_graph.jl")
+using .Create_Graph
 
 using LightGraphs
 
@@ -26,72 +29,67 @@ using LightGraphs
     end
 
 
-    function find_left_path(graph, max_l, multiplier, middle_index)
-        path = Vector{Int}() 
-        current = 1
-        finish = nv(graph)
-        i = 0
-        first_grow = true
-        last_shrink = true
-        while current != finish
-            side_points = max_l - multiplier * abs(i+1-middle_index)
-            push!(path, current)
-            neighbors_list = collect(neighbors(graph, current))
-        
-            # Sprawdź, czy sąsiedzi są dostępni
-            if isempty(neighbors_list)
-                break  # Nie ma więcej sąsiadów, kończymy
-            end
-
-            if side_points <= 0
-                if first_grow && i > middle_index
-                    current += 2
-                    first_grow = false
-                else
-                    current += 1
-                end
+    function find_left_path(g, node_positions, middle_index)
+        most_left_path =  Vector{Int}()
+        number_of_layers = 0
+        if middle_index % 2 == 0
+            number_of_layers = 2 * middle_index 
+        else
+            number_of_layers = 2 * middle_index + 1 
+        end 
+        number_of_layers = number_of_layers + 1
+        layers = []
+        prev_neighbors = []
+        for vertex in vertices(g)
+            neighbors = outneighbors(g, vertex)
+            if prev_neighbors == neighbors
+                continue
             else
-                if last_shrink
-                    current += side_points * 2
-                    last_shrink = false
-                else 
-                    current += side_points * 2 + 1
-                end
+                push!(layers, neighbors)
+                prev_neighbors = neighbors
             end
-    
-            i += 1
         end
-        push!(path, finish)  # Dodaj węzeł końcowy
-        return path
+        push!(most_left_path, 1)
+        for layer in layers
+            if(layer != Int64[])
+                push!(most_left_path, layer[1])
+            end
+        end
+        return most_left_path
     end
 
-    function find_right_path(graph, max_l, multiplier, middle_index)
-        path = Vector{Int}() 
-        current = 1
-        finish = nv(graph)
-        i = 0
-        while current != finish
-            side_points = max_l - multiplier * abs(i+1-middle_index)
-            push!(path, current)
-            neighbors_list = collect(neighbors(graph, current))
-        
-            # Sprawdź, czy sąsiedzi są dostępni
-            if isempty(neighbors_list)
-                break  # Nie ma więcej sąsiadów, kończymy
-            end
-
-            if side_points <= 0
-                current += 1
+    function find_right_path(g, node_positions, middle_index)
+        most_right_path =  Vector{Int}()
+        number_of_layers = 0
+        if middle_index % 2 == 0
+            number_of_layers = 2 * middle_index 
+        else
+            number_of_layers = 2 * middle_index + 1 
+        end 
+        number_of_layers = number_of_layers + 1
+        layers = []
+        prev_neighbors = []
+        for vertex in vertices(g)
+            neighbors = outneighbors(g, vertex)
+            if prev_neighbors == neighbors
+                continue
             else
-               current += side_points * 2 + 1    
+                push!(layers, neighbors)
+                prev_neighbors = neighbors
             end
-    
-            i += 1
         end
-        push!(path, finish)  # Dodaj węzeł końcowy
-        return path
+        push!(most_right_path, 1)
+        for layer in layers
+            if(layer != Int64[])
+                push!(most_right_path, layer[end])
+            end
+        end
+        return most_right_path
     end
     
 end
 
-# println(Paths.find_random_path(Create_Graph.generate_graph( 2, 7, 16, 19, 4, 5, 2, 3)))
+# graph, node_positions, middle_index = Create_Graph.generate_graph( 2, 7, 16, 19, 4, 2, 2, 1)
+# println(Paths.find_left_path(graph, node_positions, middle_index))
+# println(Paths.find_random_path(graph))
+# println(Paths.find_right_path(graph, node_positions, middle_index))
