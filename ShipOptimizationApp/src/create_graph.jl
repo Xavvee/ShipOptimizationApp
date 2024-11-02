@@ -6,26 +6,28 @@ module Create_Graph
     using LightGraphs
     using Plots
 
-    # Function to generate points and create a directed graph
     function generate_graph(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
         # Generate the points
         all_points, middle_index = Graph.generate_points(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
         # Create a directed graph
         flattened_points = vcat(all_points...)
-
-
+    
         # Create a directed graph with the correct number of points
         num_points = length(flattened_points)
         println("Total number of points: ", num_points)
         g = SimpleDiGraph(num_points)
         
         # Map each set of points in all_points to a unique index
-        node_counter = 1
         point_to_node = Dict{Tuple{Float64, Float64}, Int}()
-        node_positions = []
-
-        for (_, side_points) in enumerate(all_points)
-            for point in side_points
+        node_positions::Vector{Tuple{Float64, Float64}} = Tuple{Float64, Float64}[]  # Ensure correct type
+        node_counter = 1  
+    
+        # Flatten the all_points while ensuring left-to-right numbering
+        for side_points in all_points
+            # Sort side_points based on x-coordinate to number left to right
+            sorted_points = sort(side_points, by = p -> p[1])  # Sort by x-coordinate
+            
+            for point in sorted_points
                 if !haskey(point_to_node, point)
                     point_to_node[point] = node_counter
                     push!(node_positions, point)  # Save the point coordinates for plotting
@@ -42,7 +44,7 @@ module Create_Graph
                 end
             end
         end
-
+    
         return g, node_positions, middle_index
     end
 
@@ -74,18 +76,37 @@ module Create_Graph
         plot!(legend=:topright, ratio=:equal, grid=true)
     end
 
+    function print_graph_connections(g::SimpleDiGraph, node_positions)
+        # Iterate over each vertex in the graph
+        for vertex in vertices(g)
+            # Get the outgoing neighbors (connected vertices)
+            neighbors = outneighbors(g, vertex)
+    
+            # Retrieve the coordinates of the current vertex
+            current_coords = node_positions[vertex]
+            
+            # Print the vertex number, its coordinates, and its connections
+            println("Vertex $vertex at coordinates $current_coords is connected to: ", 
+                    collect(neighbors), 
+                    " with coordinates: ", 
+                    [node_positions[n] for n in neighbors])
+        end
+    end
+    
 
 end
 
 
-# # Example usage
-# x_start, y_start = 2, 7
-# x_finish, y_finish = 16, 19
-# k = 4  # Number of segments (k+1 points)
-# max_l = 5  # Max number of points on both sides
-# m = 2 # Distance of points from the line
-# multiplier = 3  # Controls the decrease of points towards the edges
+# Example usage
+x_start, y_start = 2, 7
+x_finish, y_finish = 16, 19
+k = 4  # Number of segments (k+1 points)
+max_l = 2  # Max number of points on both sides
+m = 2 # Distance of points from the line
+multiplier = 1 # Controls the decrease of points towards the edges
 
-# g, node_positions = Create_Graph.generate_graph(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
-# Create_Graph.plot_graph(g, node_positions)
-# println(node_positions)
+g, node_positions = Create_Graph.generate_graph(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
+Create_Graph.print_graph_connections(g, node_positions)
+
+Create_Graph.plot_graph(g, node_positions)
+
