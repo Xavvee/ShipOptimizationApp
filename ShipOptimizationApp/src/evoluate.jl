@@ -2,9 +2,9 @@ include("create_graph.jl")
 using .Create_Graph
 using LightGraphs
 
-
 include("ship.jl")
 using .Ship_Module
+
 function evoluate(ships::Array{Ship_Module.Ship})
     for ship in ships
         better_ships = []
@@ -22,13 +22,48 @@ function evoluate_one_ship(ship::Ship_Module.Ship)
     
 end
 
+using Random
+
+# Struktura generująca punkty
+struct PointGenerator
+    a::Float64   # Nachylenie
+    b::Float64   # Punkt przecięcia
+    x_start::Float64 # Początkowa wartość x
+    x_end::Float64   # Końcowa wartość x
+    current_x::Float64 # Aktualna wartość x
+end
+
+# Funkcja iterująca
+function Base.iterate(gen::PointGenerator)
+    # Generujemy losową wartość x w zadanym zakresie
+    next_x = rand() * (gen.x_end - gen.x_start) + gen.x_start
+    y = gen.a * next_x + gen.b  # Obliczanie y
+    
+    # Zwracamy nowy punkt
+    return ((next_x, y), PointGenerator(gen.a, gen.b, gen.x_start, gen.x_end, next_x))
+end
+
+
 function find_possible_points(g, node_positions, current_vertex)
     lower_range, upper_range = find_range(g, node_positions, current_vertex)
-    # szukamy funkcji w postaci y = ax + b
     a, b = line_through_two_points(lower_range, upper_range)
     println("y = $(a)*x + $b")
     println("Range: [$lower_range, $upper_range]")
-
+    point_generator = PointGenerator(a, b, lower_range[1], upper_range[1], lower_range[1])
+    
+    num_points = 10  # Liczba punktów do wygenerowania
+    points_sort_only_to_print = []
+    for _ in 1:num_points
+        point_generated = iterate(point_generator)
+        point, point_generator = point_generated
+        println("Point generated: x = $(point[1]), y = $(point[2])")
+        push!(points_sort_only_to_print, point)
+    end
+    println("-------------------")
+    sort!(points_sort_only_to_print, by = pt -> pt[1])
+    for pt in points_sort_only_to_print
+        println("-> $pt")
+    end
 end
 
 function line_through_two_points(point1, point2)
@@ -50,9 +85,7 @@ function find_range(g, node_positions, current_vertex)
         lower_range_vertex = current_vertex
         upper_range_vertex = current_vertex 
     elseif isnothing(first_neighbor)
-        x_1, _ = node_positions[current_vertex]
-        x_2, _ = node_positions[second_neighbor]
-        if x_1 < x_2
+        if node_positions[current_vertex][1] < node_positions[second_neighbor][1]
             lower_range_vertex = current_vertex
             upper_range_vertex = second_neighbor
         else
@@ -60,9 +93,7 @@ function find_range(g, node_positions, current_vertex)
             upper_range_vertex = current_vertex
         end
     elseif isnothing(second_neighbor)
-        x_1, _ = node_positions[current_vertex]
-        x_2, _ = node_positions[first_neighbor]
-        if x_1 < x_2
+        if node_positions[current_vertex][1] < node_positions[first_neighbor][1]
             lower_range_vertex = current_vertex
             upper_range_vertex = first_neighbor
         else
@@ -70,9 +101,7 @@ function find_range(g, node_positions, current_vertex)
             upper_range_vertex = current_vertex
         end
     else
-        x_1, _ = node_positions[first_neighbor]
-        x_2, _ = node_positions[second_neighbor]
-        if x_1 < x_2
+        if node_positions[first_neighbor][1] < node_positions[second_neighbor][1]
             lower_range_vertex = first_neighbor
             upper_range_vertex = second_neighbor
         else
