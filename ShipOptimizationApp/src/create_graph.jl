@@ -97,13 +97,14 @@ module Create_Graph
 end
 
 
-# # Example usage
-# x_start, y_start = 2, 7
-# x_finish, y_finish = 16, 19
-# k = 4  # Number of segments (k+1 points)
-# max_l = 2  # Max number of points on both sides
+
+# Example usage
+# x_start, y_start = -7.0, 17.0
+# x_finish, y_finish = 26.0, -9.0
+# k = 9  # Number of segments (k+1 points)
+# max_l = 7  # Max number of points on both sides
 # m = 2 # Distance of points from the line
-# multiplier = 1 # Controls the decrease of points towards the edges
+# multiplier = 2 # Controls the decrease of points towards the edges
 
 # g, node_positions = Create_Graph.generate_graph(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
 # # Create_Graph.print_graph_connections(g, node_positions)

@@ -89,7 +89,7 @@ using LightGraphs
     
 end
 
-# graph, node_positions, middle_index = Create_Graph.generate_graph( 2, 7, 16, 19, 4, 2, 2, 1)
+# graph, node_positions, middle_index = Create_Graph.generate_graph( 2, 7, 16, 19, 6, 3, 3, 1)
 # println(Paths.find_left_path(graph, node_positions, middle_index))
 # println(Paths.find_random_path(graph))
 # println(Paths.find_right_path(graph, node_positions, middle_index))

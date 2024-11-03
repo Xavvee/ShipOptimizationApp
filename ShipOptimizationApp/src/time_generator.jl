@@ -4,7 +4,7 @@ module Time_Generator
     end
 
     function Base.iterate(gen::TimeGenerator, state=gen.t)
-        next_state = state + 0.5
+        next_state = state + 0.2
         return (state, TimeGenerator(next_state))
     end
 end

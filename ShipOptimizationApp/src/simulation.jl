@@ -222,14 +222,12 @@ function simulate(T)
     global x_start, y_start, x_finish, y_finish = -7.0, 17.0, 26.0, -9.0
     max_speed = 3.0
 
-
-    
     max_l = 7
     multiplier = 2
     g, node_positions, middle_index = Create_Graph.generate_graph(x_start, y_start, x_finish, y_finish, 9, max_l, 2, multiplier)
 
-    time_step = 0.5
-    ships = []
+    time_step = 0.2
+    ships = Vector{Ship_Module.Ship}()
 
     for _ in 1:8000
         path = Paths.find_random_path(g)
@@ -318,7 +316,7 @@ function simulate(T)
     #     println("$(ship.path) -> $(ship.finish_time)")
     # end
     # println("Czas trwania symulacji: $elapsed_time")
-    return ships
+    return ships, g, node_positions
 end
 
 
