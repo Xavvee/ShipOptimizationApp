@@ -17,9 +17,8 @@ module Evoluate_Module
 
     function evoluate(ships, g, node_positions, num_points)
         better_ships = Vector{Ship_Module.Ship}() # generalna tablica z lepszymi statkami
-        indexer = 0
         for ship in ships
-            modified_ships = Vector{Ship_Module.Ship}() # tablica z "lepszymi statkami" np rozmiaru 10
+            modified_ships = Vector{Ship_Module.Ship}() # tablica z "lepszymi statkami" np rozmiaru
 
             points = Vector{Vector{Tuple{Float64, Float64}}}()
             
@@ -29,15 +28,21 @@ module Evoluate_Module
             
             for i in 1:num_points
                 new_ship = Ship_Module.Ship(node_positions[ship.path[1]][1], node_positions[ship.path[1]][2], ship.finish_x, ship.finish_y, ship.max_speed, ship.path, ship.time_step)
-                new_ship.continuous_path =  [points[j][i] for j in 1:num_points]
+                new_ship.continuous_path =  [points[j][i] for j in 1:length(ship.path)]
                 push!(modified_ships, new_ship)
             end
+            better_found = false
             for modified_ship in modified_ships # dla kazdego lepszego statku sprawdz
                 evoluate_one_ship(modified_ship)
                 if modified_ship.finish_time < ship.finish_time
-                    indexer = indexer + 1
+                    better_found = true
                     push!(better_ships, modified_ship)
                 end
+            end
+            if !better_found
+                old_ship = Ship_Module.Ship(node_positions[ship.path[1]][1], node_positions[ship.path[1]][2], ship.finish_x, ship.finish_y, ship.max_speed, ship.path, ship.time_step)
+                old_ship.finish_time = ship.finish_time
+                push!(better_ships, old_ship)
             end
         end
         return better_ships
@@ -47,7 +52,6 @@ module Evoluate_Module
         points = ship.continuous_path
         n = length(points)
         T = 24
-        # println(ship)
         local time_generator = Time_Generator.TimeGenerator(0.0)
         local time = 0.0
         while ship.current_node_index < n
@@ -58,11 +62,6 @@ module Evoluate_Module
             time, time_generator = time_generated 
 
             Ship_Module.update_field_speed!(ship, Field.v_custom(ship.position_x, ship.position_y, mod(time, 24), T, "x"), Field.v_custom(ship.position_x, ship.position_y,  mod(time, 24), T, "y"))
-
-            # # If ship reached the end of its path, continue to next iteration
-            # if ship.current_node_index >= n
-            #     continue
-            # end
 
             # Update the ship's movement
             next_x, next_y = points[ship.current_node_index+1]

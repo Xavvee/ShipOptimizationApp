@@ -25,9 +25,9 @@ for ship in ships
     println("$(ship.path) -> $(ship.finish_time)")
 end
 
-better_ships = Evoluate_Module.evoluate(ships, g, node_positions, 10)
+ships = Evoluate_Module.evoluate(ships, g, node_positions, 100)
 
-sorted_ships = sort(better_ships, by = ship -> ship.finish_time, rev = true)
+sorted_ships = sort(ships, by = ship -> ship.finish_time, rev = true)
 
 println("------------------")
 for ship in sorted_ships
