@@ -1,15 +1,21 @@
 module Time_Generator
+    using TOML
+    config_path = joinpath(@__DIR__, "configuration", "config.toml")
+    config = TOML.parsefile(config_path)
+    time_step = config["time_settings"]["time_step"]
+    
     struct TimeGenerator
         t::Float64
     end
 
     function Base.iterate(gen::TimeGenerator, state=gen.t)
-        next_state = state + 0.2
+        next_state = state + time_step
         return (state, TimeGenerator(next_state))
     end
 end
 
-# global gen = TimeGenerator(0.0)
+# # Uzyskaj dostęp do `TimeGenerator` z modułu `Time_Generator`
+# global gen = Time_Generator.TimeGenerator(0.0)
 
 # # Wydrukuj pierwsze 50 wartości
 # for i in 1:50

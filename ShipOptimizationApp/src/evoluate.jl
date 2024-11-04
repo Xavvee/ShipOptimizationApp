@@ -15,6 +15,10 @@ module Evoluate_Module
     include("utils.jl")
     using .Utils
 
+    using TOML
+    config_path = joinpath(@__DIR__, "configuration", "config.toml")
+    config = TOML.parsefile(config_path)
+
     function evoluate(ships, g, node_positions, num_points)
         better_ships = Vector{Ship_Module.Ship}() # generalna tablica z lepszymi statkami
         for ship in ships
@@ -51,7 +55,7 @@ module Evoluate_Module
     function evoluate_one_ship(ship::Ship_Module.Ship)
         points = ship.continuous_path
         n = length(points)
-        T = 24
+        T = config["time_settings"]["T"]
         local time_generator = Time_Generator.TimeGenerator(0.0)
         local time = 0.0
         while ship.current_node_index < n

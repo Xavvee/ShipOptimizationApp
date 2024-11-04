@@ -25,6 +25,16 @@ using LightGraphs
 using Base.Threads
 using Dates
 
+using TOML
+config_path = joinpath(@__DIR__, "configuration", "config.toml")
+config = TOML.parsefile(config_path)
+
+generate_graph_settings = config["generate_graph_settings"]
+
+ship_settings = config["ship_settings"]
+
+
+
 # Funkcja do uzyskania celu od użytkownika
 
 function create_custom_range(range_min, range_step, range_max)
@@ -87,8 +97,11 @@ function simulate_multiple_ships(x_range, y_range, T)
     println("Start loop")
     
     # Define start and finish positions
-    global x_start, y_start, x_finish, y_finish = -7.0, 17.0, 26.0, -9.0
-    max_speed = 3.0
+    x_start = ship_settings["x_start"]
+    y_start = ship_settings["y_start"]
+    x_finish = ship_settings["x_finish"]
+    y_finish = ship_settings["y_finish"]
+    max_speed = ship_settings["max_speed"]
     quiver_plots = []
 
     # Generate grid points
@@ -96,10 +109,12 @@ function simulate_multiple_ships(x_range, y_range, T)
 
     # Initialize a time generator
     global time_generator = Time_Generator.TimeGenerator(0.0)
-    max_l = 7
-    multiplier = 2
-    g, node_positions, middle_index = Create_Graph.generate_graph(x_start, y_start, x_finish, y_finish, 9, max_l, 2, multiplier)
-    time_step = 0.5
+    max_l = generate_graph_settings["max_l"]
+    multiplier = generate_graph_settings["multiplier"]
+    k = generate_graph_settings["k"]
+    m = generate_graph_settings["m"]
+    g, node_positions, middle_index = Create_Graph.generate_graph(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
+    time_step = config["time_settings"]["time_step"]
 
     # Create multiple ships with different pathfinding techniques
     # num_ships = 3
@@ -219,17 +234,23 @@ end
 function simulate(T)
     println("Start loop for graph")
 
-    global x_start, y_start, x_finish, y_finish = -7.0, 17.0, 26.0, -9.0
-    max_speed = 3.0
+    x_start = ship_settings["x_start"]
+    y_start = ship_settings["y_start"]
+    x_finish = ship_settings["x_finish"]
+    y_finish = ship_settings["y_finish"]
+    max_speed = ship_settings["max_speed"]
 
-    max_l = 7
-    multiplier = 2
-    g, node_positions, middle_index = Create_Graph.generate_graph(x_start, y_start, x_finish, y_finish, 9, max_l, 2, multiplier)
+    max_l = generate_graph_settings["max_l"]
+    multiplier = generate_graph_settings["multiplier"]
+    k = generate_graph_settings["k"]
+    m = generate_graph_settings["m"]
+    g, node_positions, middle_index = Create_Graph.generate_graph(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
 
-    time_step = 0.2
+    time_step = config["time_settings"]["time_step"]
     ships = Vector{Ship_Module.Ship}()
 
-    for _ in 1:8000
+    ships_amount = config["simulation_settings"]["ships_amount"]
+    for _ in 1:ships_amount
         path = Paths.find_random_path(g)
         ship = Ship_Module.Ship(x_start, y_start, x_finish, y_finish, max_speed, path, time_step)
         push!(ships, ship)
