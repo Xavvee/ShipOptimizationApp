@@ -59,4 +59,6 @@ function simulate_with_gif()
     gif(anim, "vector_field.gif", fps=3)
 end
 
-simulate_without_gif()
+# simulate_without_gif()
+
+simulate_with_gif()

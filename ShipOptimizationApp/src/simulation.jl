@@ -150,10 +150,11 @@ function simulate_multiple_ships(x_range, y_range, T)
         if time_generated === nothing
             break
         end
-        println("Time generated: ", time_generated)
+        # println("Time generated: ", time_generated)
         time, time_generator = time_generated
-
+        time = round(time, digits=4)
         # Initialize the velocity field
+
         vx_values, vy_values = calculate_velocity_field(grid_points, time, T)
 
         # Create the plot for this time step
@@ -163,11 +164,13 @@ function simulate_multiple_ships(x_range, y_range, T)
                 g, node_positions)
 
         for ship in ships
+            time_consumed = 0.0
 
             Ship_Module.update_field_speed!(ship, Field.v_custom(ship.position_x, ship.position_y, mod(time, 24), T, "x"), Field.v_custom(ship.position_x, ship.position_y, mod(time,24), T, "y"))
 
             # Add velocity field vector
             quiver!(quiver_plot, [ship.position_x], [ship.position_y], quiver=([ship.field_speed_x], [ship.field_speed_y]), color=:black, linewidth=2)
+ 
             # If ship reached the end of its path, continue to next iteration
             if ship.current_node_index >= length(ship.path)
                 continue
@@ -193,6 +196,7 @@ function simulate_multiple_ships(x_range, y_range, T)
             if norm > 0
                 # Calculate how far the ship can move towards the next node without overshooting
                 if(norm < v_sum_norm*ship.time_step)
+                    println("TIME: $time")
                     remaining_percentage = 1 - (norm/(v_sum_norm*ship.time_step))
                     # println("Po drugiej stronie: $remaining_percentage")
                     ship.position_x = next_x
@@ -210,12 +214,15 @@ function simulate_multiple_ships(x_range, y_range, T)
                         ship.position_y += (ship.resultant_speed_y)*remaining_percentage*ship.time_step
                     end
                     ship.current_node_index += 1
+                    if ship.current_node_index == length(ship.path)
+                        time_consumed = round(time_step*(1 - remaining_percentage), digits=4)
+                    end
                 else
                     # Update current position of the ship
                     Ship_Module.move!(ship)
                 end
             end
-            ship.finish_time = time
+            ship.finish_time = round(time + time_consumed, digits=4)
         end
 
         # Store plot for this time step
