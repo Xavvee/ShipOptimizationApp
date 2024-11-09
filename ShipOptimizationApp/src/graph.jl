@@ -1,4 +1,4 @@
-module Graph
+module Graph_Module
     using Plots
 
     # Function to generate points with increasing and decreasing number of dots

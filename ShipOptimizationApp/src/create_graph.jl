@@ -1,14 +1,13 @@
-module Create_Graph
+module Create_Graph_Module
 
-    include("graph.jl")
-    using .Graph
+    using ..IncludesModule
 
     using LightGraphs
     using Plots
 
     function generate_graph(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
         # Generate the points
-        all_points, middle_index = Graph.generate_points(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
+        all_points, middle_index = Graph_Module.generate_points(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
         # Create a directed graph
         flattened_points = vcat(all_points...)
     
@@ -106,8 +105,8 @@ end
 # m = 2 # Distance of points from the line
 # multiplier = 2 # Controls the decrease of points towards the edges
 
-# g, node_positions = Create_Graph.generate_graph(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
-# # Create_Graph.print_graph_connections(g, node_positions)
+# g, node_positions = Create_Graph_Module.generate_graph(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
+# # Create_Graph_Module.print_graph_connections(g, node_positions)
 
-# Create_Graph.plot_graph(g, node_positions)
+# Create_Graph_Module.plot_graph(g, node_positions)
 

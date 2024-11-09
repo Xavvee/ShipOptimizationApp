@@ -1,4 +1,4 @@
-module Field
+module Field_Module
 # Funkcje definiujące składowe wektorów
 function v_custom(x, y, t, T, coordinate)
     if lowercase(coordinate) == "x"

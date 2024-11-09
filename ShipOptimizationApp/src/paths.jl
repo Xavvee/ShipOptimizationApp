@@ -1,12 +1,6 @@
-
-include("create_graph.jl")
-using .Create_Graph
-module Paths
-
-include("create_graph.jl")
-using .Create_Graph
-
-using LightGraphs
+module Paths_Module
+    using ..IncludesModule
+    using LightGraphs
 
     function find_random_path(graph)
         path = Vector{Int}() 
@@ -89,7 +83,7 @@ using LightGraphs
     
 end
 
-# graph, node_positions, middle_index = Create_Graph.generate_graph( 2, 7, 16, 19, 6, 3, 3, 1)
-# println(Paths.find_left_path(graph, node_positions, middle_index))
-# println(Paths.find_random_path(graph))
-# println(Paths.find_right_path(graph, node_positions, middle_index))
+# graph, node_positions, middle_index = Create_Graph_Module.generate_graph( 2, 7, 16, 19, 6, 3, 3, 1)
+# println(Paths_Module.find_left_path(graph, node_positions, middle_index))
+# println(Paths_Module.find_random_path(graph))
+# println(Paths_Module.find_right_path(graph, node_positions, middle_index))

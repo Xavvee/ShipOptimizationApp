@@ -1,4 +1,4 @@
-module Time_Generator
+module Time_Generator_Module
     using TOML
     config_path = joinpath(@__DIR__, "configuration", "config.toml")
     config = TOML.parsefile(config_path)
@@ -14,8 +14,8 @@ module Time_Generator
     end
 end
 
-# # Uzyskaj dostęp do `TimeGenerator` z modułu `Time_Generator`
-# global gen = Time_Generator.TimeGenerator(0.0)
+# # Uzyskaj dostęp do `TimeGenerator` z modułu `Time_Generator_Module`
+# global gen = Time_Generator_Module.TimeGenerator(0.0)
 
 # # Wydrukuj pierwsze 50 wartości
 # for i in 1:50

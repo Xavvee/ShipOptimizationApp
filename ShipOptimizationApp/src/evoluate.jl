@@ -1,21 +1,8 @@
 module Evoluate_Module
-    include("create_graph.jl")
-    using .Create_Graph
-    using LightGraphs
 
-    include("ship.jl")
-    using .Ship_Module
-
-    include("time_generator.jl")
-    using .Time_Generator
-
-    include("field.jl")
-    using .Field
-
-    include("utils.jl")
-    using .Utils
-
+    using ..IncludesModule
     using TOML
+    using LightGraphs
     config_path = joinpath(@__DIR__, "configuration", "config.toml")
     config = TOML.parsefile(config_path)
 
@@ -54,18 +41,20 @@ module Evoluate_Module
 
     function evoluate_one_ship(ship::Ship_Module.Ship)
         points = ship.continuous_path
+        time_consumed = 0.0
         n = length(points)
         T = config["time_settings"]["T"]
-        local time_generator = Time_Generator.TimeGenerator(0.0)
+        local time_generator = Time_Generator_Module.TimeGenerator(0.0)
         local time = 0.0
         while ship.current_node_index < n
-            time_generated = Time_Generator.iterate(time_generator)
+            time_generated = Time_Generator_Module.iterate(time_generator)
             if time_generated === nothing
                 break
             end
             time, time_generator = time_generated 
+            time = round(time, digits=4)
 
-            Ship_Module.update_field_speed!(ship, Field.v_custom(ship.position_x, ship.position_y, mod(time, 24), T, "x"), Field.v_custom(ship.position_x, ship.position_y,  mod(time, 24), T, "y"))
+            Ship_Module.update_field_speed!(ship, Field_Module.v_custom(ship.position_x, ship.position_y, mod(time, 24), T, "x"), Field_Module.v_custom(ship.position_x, ship.position_y,  mod(time, 24), T, "y"))
 
             # Update the ship's movement
             next_x, next_y = points[ship.current_node_index+1]
@@ -74,7 +63,7 @@ module Evoluate_Module
             norm = sqrt(direction_x^2 + direction_y^2)
 
             # Calculate ship speed and update positions
-            ship_direction_x, ship_direction_y = Utils.calculate_ship_direction([ship.field_speed_x, ship.field_speed_y], [direction_x, direction_y], ship.max_speed)
+            ship_direction_x, ship_direction_y = Utils_Module.calculate_ship_direction([ship.field_speed_x, ship.field_speed_y], [direction_x, direction_y], ship.max_speed)
             Ship_Module.update_ship_speed!(ship, ship_direction_x, ship_direction_y)
 
             Ship_Module.update_resultant_speed!(ship)
@@ -91,7 +80,7 @@ module Evoluate_Module
                         tmp_next_x, tmp_next_y = points[ship.current_node_index + 2]
                         tmp_direction_x = tmp_next_x - ship.position_x
                         tmp_direction_y = tmp_next_y - ship.position_y
-                        ship_direction_x, ship_direction_y = Utils.calculate_ship_direction([ship.field_speed_x, ship.field_speed_y], [tmp_direction_x, tmp_direction_y], ship.max_speed)
+                        ship_direction_x, ship_direction_y = Utils_Module.calculate_ship_direction([ship.field_speed_x, ship.field_speed_y], [tmp_direction_x, tmp_direction_y], ship.max_speed)
                         Ship_Module.update_ship_speed!(ship, ship_direction_x, ship_direction_y)
                         Ship_Module.update_resultant_speed!(ship)
                         
@@ -99,13 +88,16 @@ module Evoluate_Module
                         ship.position_y += (ship.resultant_speed_y)*remaining_percentage*ship.time_step
                     end
                     ship.current_node_index += 1
+                    if ship.current_node_index == length(ship.path)
+                        time_consumed = round(ship.time_step*(1 - remaining_percentage), digits=4)
+                    end
                 else
                     # Update current position of the ship
                     Ship_Module.move!(ship)
                 end
             end
         end
-        ship.finish_time = time
+        ship.finish_time = round(time + time_consumed, digits=4)
         return ship
     end
 
@@ -224,8 +216,8 @@ end
 # m = 2 # Distance of points from the line
 # multiplier = 1  # Controls the decrease of points towards the edges
 
-# g, node_positions = Create_Graph.generate_graph(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
-# Create_Graph.plot_graph(g, node_positions)
+# g, node_positions = Create_Graph_Module.generate_graph(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
+# Create_Graph_Module.plot_graph(g, node_positions)
 
 # find_possible_points(g, node_positions, 6, 10)
 
