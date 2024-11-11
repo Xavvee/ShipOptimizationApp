@@ -5,8 +5,8 @@ T = 24
 [generate_graph_settings]
 max_l = 7
 multiplier = 2
-k=9
-m=2
+k = 9
+m = 2
 
 [ship_settings]
 x_start = -7.0 
@@ -31,4 +31,4 @@ t_range_max = 23.5
 num_points = 100
 
 [simulation_settings]
-ships_amount = 8000
+ships_amount = 1000

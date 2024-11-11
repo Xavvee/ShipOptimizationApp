@@ -34,16 +34,16 @@ module Main_Module
         ships, g, node_positions = Simulation_Module.simulate(T)
         ships = Simulation_Module.quick_select(ships)
         for ship in ships
-            println("$(ship.path) -> $(ship.finish_time)")
+            println("$(ship.path) -> $(ship.finish_time) | $(ship.fuel_consumption)")
         end
 
         ships = Evoluate_Module.evoluate(ships, g, node_positions, config["evoluate_settings"]["num_points"])
-
         sorted_ships = sort(ships, by = ship -> ship.finish_time, rev = true)
+        # sorted_ships = sort(ships, by = ship -> ship.fuel_consumption, rev = true)
 
         println("------------------")
         for ship in sorted_ships
-            println("Fixed: $(ship.path) -> $(ship.finish_time)")
+            println("Fixed: $(ship.path) -> $(ship.finish_time) | $(ship.fuel_consumption)")
         end
     
     end

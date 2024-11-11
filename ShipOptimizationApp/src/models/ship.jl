@@ -21,8 +21,10 @@ module Ship_Module
 
         continuous_path::Vector{Tuple{Float64, Float64}}
 
+        fuel_consumption::Float64
+
         function Ship(position_x::Float64, position_y::Float64, finish_x::Float64, finish_y::Float64, max_speed::Float64, path::Vector{Int}, time_step::Float64)
-            new(position_x, position_y, finish_x, finish_y, max_speed, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, path, 1, 0, time_step, [])
+            new(position_x, position_y, finish_x, finish_y, max_speed, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, path, 1, 0, time_step, [], 0.0)
         end
     end
 

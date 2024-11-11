@@ -76,6 +76,8 @@ module Evoluate_Module
                     remaining_percentage = 1 - (norm/(v_sum_norm*ship.time_step))
                     ship.position_x = next_x
                     ship.position_y = next_y
+                    ship.fuel_consumption = ship.fuel_consumption + Fuel_Consumption_Module.integral_for_r(ship.time_step * (1 - remaining_percentage), sqrt(ship.ship_speed_x^2 + ship.ship_speed_y^2))
+                    
                     if ship.current_node_index < n - 1
                         tmp_next_x, tmp_next_y = points[ship.current_node_index + 2]
                         tmp_direction_x = tmp_next_x - ship.position_x
@@ -86,6 +88,7 @@ module Evoluate_Module
                         
                         ship.position_x += (ship.resultant_speed_x)*remaining_percentage*ship.time_step
                         ship.position_y += (ship.resultant_speed_y)*remaining_percentage*ship.time_step
+                        ship.fuel_consumption = ship.fuel_consumption + Fuel_Consumption_Module.integral_for_r(ship.time_step * remaining_percentage, sqrt(ship.ship_speed_x^2 + ship.ship_speed_y^2))
                     end
                     ship.current_node_index += 1
                     if ship.current_node_index == length(ship.path)
@@ -94,6 +97,7 @@ module Evoluate_Module
                 else
                     # Update current position of the ship
                     Ship_Module.move!(ship)
+                    ship.fuel_consumption = ship.fuel_consumption + Fuel_Consumption_Module.integral_for_r(ship.time_step, sqrt(ship.ship_speed_x^2 + ship.ship_speed_y^2))
                 end
             end
         end

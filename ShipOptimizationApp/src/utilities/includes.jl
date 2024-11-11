@@ -1,4 +1,7 @@
 module IncludesModule
+    include("../models/fuel_consumption.jl")
+    using .Fuel_Consumption_Module
+    export Fuel_Consumption_Module
 
     include("../graph/graph.jl")
     using .Graph_Module
