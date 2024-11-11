@@ -301,25 +301,23 @@ module Simulation_Module
     end
 
 
-    function find_non_dominated_points(points)
-        non_dominated_points = []  # Lista na punkty bez dominacji
-        
-        for ship in points
-            dominated = false
-            for other_ship in points
-                # Sprawdzamy, czy istnieje inny punkt z obydwoma współrzędnymi mniejszymi
-                if other_ship.finish_time < ship.finish_time && other_ship.fuel_consumption < ship.fuel_consumption 
-                    dominated = true
-                    break
-                end
-            end
-            # Dodajemy punkt do wynikowej listy, jeśli nie jest zdominowany
-            if !dominated
-                push!(non_dominated_points, ship)
+    function find_pareto_points(ships)
+        # Sortujemy statki według finish_time malejąco, a potem fuel_consumption rosnąco
+        sort!(ships, by = x -> (x.finish_time, x.fuel_consumption))
+
+        max_fuel = Inf
+
+        pareto_points = []
+
+        # Przechodzimy po posortowanej liście statków
+        for ship in ships
+            if ship.fuel_consumption < max_fuel
+                push!(pareto_points, ship)  
+                max_fuel = ship.fuel_consumption
             end
         end
         
-        return non_dominated_points
+        return pareto_points
     end
 
 end

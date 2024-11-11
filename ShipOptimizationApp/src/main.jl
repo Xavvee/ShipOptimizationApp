@@ -38,8 +38,8 @@ module Main_Module
         # #     println("$(ship.path) -> $(ship.finish_time) | $(ship.fuel_consumption)")
         # # end
 
-        non_dominated_points = Simulation_Module.find_non_dominated_points(ships)
-        evoluated_ships = Evoluate_Module.evoluate(non_dominated_points, g, node_positions, config["evoluate_settings"]["num_points"])
+        pareto_points = Simulation_Module.find_pareto_points(ships)
+        evoluated_ships = Evoluate_Module.evoluate(pareto_points, g, node_positions, config["evoluate_settings"]["num_points"])
         # evoluated_ships = sort(evoluated_ships, by = ship -> ship.finish_time, rev = true)
         # sorted_ships = sort(ships, by = ship -> ship.fuel_consumption, rev = true)
 
@@ -68,19 +68,25 @@ module Main_Module
     #     println("Fixed: $(ship.path) -> $(ship.finish_time) | $(ship.fuel_consumption)")
     # end
 
-    println(length(ships1))
-    println(length(evoluated_ships))
-    println(length(result_ships))
-
-    pl = plot()
-    scatter!(map(x -> x.finish_time, ships), map(x -> x.fuel_consumption, ships), label="Ships", color=:red)
-    scatter!(map(x -> x.finish_time, evoluated_ships), map(x -> x.fuel_consumption, evoluated_ships), label="Evoluated Ships", color=:green)
-    scatter!(map(x -> x.finish_time, result_ships), map(x -> x.fuel_consumption, result_ships), label="Result Ships", color=:blue)
-
-    # # Dodanie etykiet osi
-    xlabel!("Finish Time")
-    ylabel!("Fuel Consumption")
-    # xlims!(13, 16) 
-    # ylims!(1.7, 2.5)
-    display(pl)
+    function display_ship_plots(ships_lists, labels)
+        for i in 1:length(ships_lists)
+            println("Number of ships in $(labels[i]): $(length(ships_lists[i]))")
+        end
+    
+        pl = plot()
+        colors = [:red, :green, :blue]
+        
+        for i in 1:length(ships_lists)
+            scatter!(map(x -> x.finish_time, ships_lists[i]), 
+                     map(x -> x.fuel_consumption, ships_lists[i]), 
+                     label=labels[i], color=colors[i])
+        end
+    
+        xlabel!("Finish Time")
+        ylabel!("Fuel Consumption")
+        display(pl)
+    end
+    
+    # Now, you can call the function with the appropriate arguments:
+    display_ship_plots([ships1, evoluated_ships, result_ships], ["Ships", "Evoluated Ships", "Result Ships"])
 end

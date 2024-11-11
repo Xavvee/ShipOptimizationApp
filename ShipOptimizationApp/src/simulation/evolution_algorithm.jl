@@ -1,6 +1,7 @@
 module Evolution_Algorithm_Module
     using ..IncludesModule
     using Evolutionary
+    using StatsBase
 
     function evoluate_with_evolutionary(ships, g, node_positions, num_points, generations, μ, λ)
         # Initial population
@@ -35,15 +36,21 @@ module Evolution_Algorithm_Module
             combined_population = vcat(population, offspring)
     
             # Select the top μ individuals based on finish time
-            sorted_population = sort!(combined_population, by = ship -> ship.finish_time)
-            population = sorted_population[1:μ]
-    
+            
+            # sorted_population = sort!(combined_population, by = ship -> ship.finish_time)
+            # population = sorted_population[1:μ]
+            
+            pareto_population = Simulation_Module.find_pareto_points(combined_population)
+            pareto_population = sample(pareto_population, min(μ, length(pareto_population)), replace=false)
+
             # Store the best ship found in this generation
-            push!(best_ships, population[1])
+            append!(best_ships, pareto_population)
         end
     
         # Return the best ships found in each generation for further analysis
         return best_ships
+        # return Simulation_Module.find_pareto_points(best_ships)
+
     end
     
    
