@@ -36,13 +36,45 @@ module Utils_Module
 
 
 end
+using LinearAlgebra
 
-# # Example vectors
-# vc = [-2.5, 3.0]  # Current velocity vector
-# vd = [7.0, 4.0]   # Desired velocity vector (toward the destination)
-# vs_speed = 3.0    # Ship's constant speed
+function normalize(v::Vector{T}) where T
+    norm_v = sqrt(sum(v.^2)) 
+    if norm_v == 0
+        error("Cannot normalize a zero vector")
+    end
+    return v / norm_v
+end
+# Function to calculate the vector the ship should generate to achieve a target direction and speed
+function calculate_ship_vector(vc::Vector{T}, vd::Vector{T}, max_speed::T) where T
+    # Normalize the destination direction
+    direction_to_destination = normalize(vd)
+    print("field ")
+    println(vc)
+    # Target velocity vector (in the desired direction with the desired speed)
+    target_velocity = max_speed * direction_to_destination
+    print("wypadkowa ")
+    println(target_velocity)
+    
+    # Compute the required ship-generated vector to achieve the target velocity when added to the current velocity
+    required_vector = target_velocity - vc
+    print("ship ")
+    println(required_vector)    
+    return required_vector
+end
 
-# # Calculate the ship's velocity direction
-# vs = calculate_ship_direction(vc, vd, vs_speed)
 
-# println("The ship should go in the direction: $vs")
+# Example vectors
+vc = [-2.5, 3.0]  # Current velocity vector
+vd = [7.0, 4.0]   # Desired velocity vector (toward the destination)
+vs_speed = 3.0    # Ship's constant speed
+
+# Calculate the ship's velocity direction
+vs = calculate_ship_vector(vc, vd, vs_speed)
+
+println("The ship should go in the direction: $vs")
+
+println("$(vs[1]+vc[1]), $(vs[2]+vc[2])")
+println("$((vs[1]+vc[1])^2), $((vs[2]+vc[2])^2)")
+println("$(sqrt((vs[1]+vc[1])^2+(vs[2]+vc[2])^2))")
+
