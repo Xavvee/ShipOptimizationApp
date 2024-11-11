@@ -42,4 +42,8 @@ module IncludesModule
     include("../simulation/evoluate.jl")
     using .Evoluate_Module
     export Evoluate_Module
+
+    include("../simulation/evolution_algorithm.jl")
+    using .Evolution_Algorithm_Module
+    export Evolution_Algorithm_Module
 end
