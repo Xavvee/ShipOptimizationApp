@@ -33,13 +33,14 @@ module Main_Module
     # odpalać na terminalu `julia -t 4`, sprawdazć czy wyświetli odpowiednio - `Threads.nthreads()`
         ships, g, node_positions = Simulation_Module.simulate(T)
         
-        partial_sorted_ships = Simulation_Module.quick_select(ships)
-        # for ship in partial_sorted_ships
-        #     println("$(ship.path) -> $(ship.finish_time) | $(ship.fuel_consumption)")
-        # end
+        # partial_sorted_ships = Simulation_Module.quick_select(ships)
+        # # for ship in partial_sorted_ships
+        # #     println("$(ship.path) -> $(ship.finish_time) | $(ship.fuel_consumption)")
+        # # end
 
-        evoluated_ships = Evoluate_Module.evoluate(partial_sorted_ships, g, node_positions, config["evoluate_settings"]["num_points"])
-        evoluated_ships = sort(evoluated_ships, by = ship -> ship.finish_time, rev = true)
+        non_dominated_points = Simulation_Module.find_non_dominated_points(ships)
+        evoluated_ships = Evoluate_Module.evoluate(non_dominated_points, g, node_positions, config["evoluate_settings"]["num_points"])
+        # evoluated_ships = sort(evoluated_ships, by = ship -> ship.finish_time, rev = true)
         # sorted_ships = sort(ships, by = ship -> ship.fuel_consumption, rev = true)
 
         # println("------------------")

@@ -301,4 +301,25 @@ module Simulation_Module
     end
 
 
+    function find_non_dominated_points(points)
+        non_dominated_points = []  # Lista na punkty bez dominacji
+        
+        for ship in points
+            dominated = false
+            for other_ship in points
+                # Sprawdzamy, czy istnieje inny punkt z obydwoma współrzędnymi mniejszymi
+                if other_ship.finish_time < ship.finish_time && other_ship.fuel_consumption < ship.fuel_consumption 
+                    dominated = true
+                    break
+                end
+            end
+            # Dodajemy punkt do wynikowej listy, jeśli nie jest zdominowany
+            if !dominated
+                push!(non_dominated_points, ship)
+            end
+        end
+        
+        return non_dominated_points
+    end
+
 end
