@@ -34,7 +34,6 @@ module IncludesModule
     include("../models/ship.jl")
     using .Ship_Module
     export Ship_Module
-    
 
     include("../simulation/simulation.jl")
     using .Simulation_Module
@@ -43,5 +42,4 @@ module IncludesModule
     include("../simulation/evoluate.jl")
     using .Evoluate_Module
     export Evoluate_Module
-    
 end
