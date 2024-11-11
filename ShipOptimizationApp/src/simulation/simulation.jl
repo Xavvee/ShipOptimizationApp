@@ -10,7 +10,7 @@ module Simulation_Module
     using Dates
 
     using TOML
-    config_path = joinpath(@__DIR__, "configuration", "config.toml")
+    config_path = joinpath(@__DIR__, "../configuration", "config.toml")
     config = TOML.parsefile(config_path)
 
     generate_graph_settings = config["generate_graph_settings"]

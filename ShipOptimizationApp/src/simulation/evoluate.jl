@@ -3,7 +3,7 @@ module Evoluate_Module
     using ..IncludesModule
     using TOML
     using LightGraphs
-    config_path = joinpath(@__DIR__, "configuration", "config.toml")
+    config_path = joinpath(@__DIR__, "../configuration", "config.toml")
     config = TOML.parsefile(config_path)
 
     function evoluate(ships, g, node_positions, num_points)

@@ -1,45 +1,44 @@
 module IncludesModule
 
-    include("graph.jl")
+    include("../graph/graph.jl")
     using .Graph_Module
     export Graph_Module
 
-    include("create_graph.jl")
+    include("../graph/create_graph.jl")
     using .Create_Graph_Module
     export Create_Graph_Module
     
-    include("display.jl")
+    include("../utilities/display.jl")
     using .Display_Module
     export Display_Module
 
-    include("field.jl")
+    include("../models/field.jl")
     using .Field_Module
     export Field_Module
 
-    include("utils.jl")
+    include("../utilities/utils.jl")
     using .Utils_Module
     export Utils_Module
 
-    include("paths.jl")
+    include("../graph/paths.jl")
     using .Paths_Module
     export Paths_Module
 
-    include("time_generator.jl")
+    include("../utilities/time_generator.jl")
     using .Time_Generator_Module
     export Time_Generator_Module
 
-    include("ship.jl")
+    include("../models/ship.jl")
     using .Ship_Module
     export Ship_Module
     
 
-    include("simulation.jl")
+    include("../simulation/simulation.jl")
     using .Simulation_Module
     export Simulation_Module
 
-    include("evoluate.jl")
+    include("../simulation/evoluate.jl")
     using .Evoluate_Module
     export Evoluate_Module
-
     
 end

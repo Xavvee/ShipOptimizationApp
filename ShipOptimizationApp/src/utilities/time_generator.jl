@@ -1,6 +1,6 @@
 module Time_Generator_Module
     using TOML
-    config_path = joinpath(@__DIR__, "configuration", "config.toml")
+    config_path = joinpath(@__DIR__, "../configuration", "config.toml")
     config = TOML.parsefile(config_path)
     time_step = config["time_settings"]["time_step"]
     
