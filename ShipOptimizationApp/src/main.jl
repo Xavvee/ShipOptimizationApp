@@ -58,5 +58,12 @@ module Main_Module
     simulate_without_gif()
 
     # simulate_with_gif()
+    ships, g, node_positions = Simulation_Module.simulate(T)
+
+    result_ships = Evolution_Algorithm_Module.evoluate_with_evolutionary(ships, g, node_positions, 10, 15, 10, 5)
+    println("------------------")
+    for ship in result_ships
+        println("Fixed: $(ship.path) -> $(ship.finish_time) | $(ship.fuel_consumption)")
+    end
 
 end
