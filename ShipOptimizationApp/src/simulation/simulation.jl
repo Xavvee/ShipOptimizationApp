@@ -240,82 +240,23 @@ module Simulation_Module
         time_step = config["time_settings"]["time_step"]
         ships = Vector{Ship_Module.Ship}()
 
+        tasks = [] 
+        ship_lock = ReentrantLock()
         ships_amount = config["simulation_settings"]["ships_amount"]
         for _ in 1:ships_amount
-            path = Paths_Module.find_random_path(g)
-            ship = Ship_Module.Ship(x_start, y_start, x_finish, y_finish, max_speed, path, time_step)
-            push!(ships, ship)
-        end
-
-        # Lista do przechowywania obiektów `Task` dla każdego statku
-        # start_time = now()
-        tasks = []
-        for ship in ships
-            time_consumed = 0.0
-            # Tworzymy nowy wątek dla każdego statku
-            task = Threads.@spawn begin
-                local time_generator = Time_Generator_Module.TimeGenerator(0.0)
-                local time = 0.0
-                while ship.current_node_index < length(ship.path)
-                    time_generated = Time_Generator_Module.iterate(time_generator)
-                    if time_generated === nothing
-                        break
-                    end
-                    time, time_generator = time_generated 
-                    time = round(time, digits=4)
-                    Ship_Module.update_field_speed!(ship, Field_Module.v_custom(ship.position_x, ship.position_y, mod(time, 24), T, "x"), Field_Module.v_custom(ship.position_x, ship.position_y,  mod(time, 24), T, "y"))
-
-                    # If ship reached the end of its path, continue to next iteration
-                    if ship.current_node_index >= length(ship.path)
-                        continue
-                    end
-
-
-                    # Update the ship's movement
-                    next_x, next_y = node_positions[ship.path[ship.current_node_index + 1]]
-                    direction_x = next_x - ship.position_x
-                    direction_y = next_y - ship.position_y
-                    norm = sqrt(direction_x^2 + direction_y^2)
-
-                    # Calculate ship speed and update positions
-                    ship_direction_x, ship_direction_y = Utils_Module.calculate_ship_direction([ship.field_speed_x, ship.field_speed_y], [direction_x, direction_y], ship.max_speed)
-                    Ship_Module.update_ship_speed!(ship, ship_direction_x, ship_direction_y)
-
-                    Ship_Module.update_resultant_speed!(ship)
-
-
-                    v_sum_norm = sqrt(ship.resultant_speed_x^2 + ship.resultant_speed_y^2)
-
-                    if norm > 0
-                        # Calculate how far the ship can move towards the next node without overshooting
-                        if(norm < v_sum_norm*time_step)
-                            remaining_percentage = 1 - (norm/(v_sum_norm*time_step))
-                            ship.position_x = next_x
-                            ship.position_y = next_y
-                            if ship.current_node_index < length(ship.path) - 1
-                                tmp_next_x, tmp_next_y = node_positions[ship.path[ship.current_node_index + 2]]
-                                tmp_direction_x = tmp_next_x - ship.position_x
-                                tmp_direction_y = tmp_next_y - ship.position_y
-                                ship_direction_x, ship_direction_y = Utils_Module.calculate_ship_direction([ship.field_speed_x, ship.field_speed_y], [tmp_direction_x, tmp_direction_y], ship.max_speed)
-                                Ship_Module.update_ship_speed!(ship, ship_direction_x, ship_direction_y)
-                                Ship_Module.update_resultant_speed!(ship)
-                                
-                                ship.position_x += (ship.resultant_speed_x)*remaining_percentage*time_step
-                                ship.position_y += (ship.resultant_speed_y)*remaining_percentage*time_step
-                            end
-                            ship.current_node_index += 1
-                            if ship.current_node_index == length(ship.path)
-                                time_consumed = round(time_step*(1 - remaining_percentage), digits=4)
-                            end
-                        else
-                            # Update current position of the ship
-                            Ship_Module.move!(ship)
-                        end
-                    end
+            task = @spawn begin
+                path = Paths_Module.find_random_path(g)
+                ship = Ship_Module.Ship(x_start, y_start, x_finish, y_finish, max_speed, path, time_step)
+                for vertex in path
+                    push!(ship.continuous_path, node_positions[vertex])
                 end
-                ship.finish_time = round(time + time_consumed, digits=4)
-            end
 
+                # Dodawanie statku do listy (operacja ta może być równoległa, ale należy to zrobić ostrożnie)
+                
+                lock(ship_lock) do
+                    push!(ships, ship)
+                end
+            end
             push!(tasks, task)
         end
 
@@ -324,14 +265,21 @@ module Simulation_Module
             fetch(task)
         end
 
-        # Zapisujemy czas zakończenia
-        # end_time = now()
-        # elapsed_time = end_time - start_time
+        # Lista do przechowywania obiektów `Task` dla każdego statku
+        tasks = []
+        for ship in ships
+            # Tworzymy nowy wątek dla każdego statku
+            task = Threads.@spawn begin
+                Evoluate_Module.evoluate_one_ship(ship)
+            end
+            push!(tasks, task)
+        end
 
-        # for ship in ships
-        #     println("$(ship.path) -> $(ship.finish_time)")
-        # end
-        # println("Czas trwania symulacji: $elapsed_time")
+        # Czekamy na zakończenie wszystkich zadań
+        for task in tasks
+            fetch(task)
+        end
+
         return ships, g, node_positions
     end
 
