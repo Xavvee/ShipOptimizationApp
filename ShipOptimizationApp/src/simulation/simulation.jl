@@ -18,9 +18,6 @@ module Simulation_Module
     ship_settings = config["ship_settings"]
 
 
-
-    # Funkcja do uzyskania celu od użytkownika
-
     function create_custom_range(range_min, range_step, range_max)
         return range_min:range_step:range_max
     end
@@ -31,38 +28,30 @@ module Simulation_Module
 
         quiver_plot = plot(xlim=(x_min, x_max), ylim=(y_min, y_max), xlabel="x", ylabel="y", title="Pole Wektorowe dla time = $time, T = $T", legend=false, bottom_margin=30px, right_margin=30px)
         
-        # Plot the velocity field
         quiver!(quiver_plot, [p[1] for p in grid_points], [p[2] for p in grid_points], quiver=(vx_values, vy_values), color=:blue)
         
-        # Rysowanie wykresu
         scatter!(quiver_plot, x_curr, y_curr, color=:red, markersize=8)
         
-        labels = ["$i" for i in 1:length(x_curr)]  # Tworzenie etykiet dla każdego statku
+        labels = ["$i" for i in 1:length(x_curr)]
         
-        # Definiowanie przesunięcia (dostosuj te wartości w zależności od potrzeb)
+        # Positions relocation on the plot
         dx = 1
         dy = 1
 
-        # Dodawanie etykiet do każdego punktu
         for (x, y, label) in zip(x_curr, y_curr, labels)
             annotate!(quiver_plot, x + dx, y + dy, text(label, 10, :black))
         end
 
-        # Plot the graph edges
         for e in edges(g)
-            # Get source and destination nodes from the edge
             src = e.src
             dst = e.dst
 
-            # Get the coordinates of the source and destination nodes
             x_src, y_src = node_positions[src]
             x_dst, y_dst = node_positions[dst]
 
-            # Plot the edge as a line between the source and destination points
             plot!([x_src, x_dst], [y_src, y_dst], seriestype=:line, color=:green, label=false)
         end
 
-        # Plot the graph nodes
         for (_, (x_i, y_i)) in enumerate(node_positions)
             scatter!(quiver_plot, [x_i], [y_i], color=:black, markersize=3, label=false)
         end
@@ -80,7 +69,6 @@ module Simulation_Module
     function simulate_multiple_ships(x_range, y_range, T)
         println("Start loop")
         
-        # Define start and finish positions
         x_start = ship_settings["x_start"]
         y_start = ship_settings["y_start"]
         x_finish = ship_settings["x_finish"]
@@ -88,10 +76,8 @@ module Simulation_Module
         max_speed = ship_settings["max_speed"]
         quiver_plots = []
 
-        # Generate grid points
         grid_points = collect(Iterators.product(x_range, y_range))
 
-        # Initialize a time generator
         global time_generator = Time_Generator_Module.TimeGenerator(0.0)
         max_l = generate_graph_settings["max_l"]
         multiplier = generate_graph_settings["multiplier"]
@@ -99,25 +85,8 @@ module Simulation_Module
         m = generate_graph_settings["m"]
         g, node_positions, middle_index = Create_Graph_Module.generate_graph(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
         time_step = config["time_settings"]["time_step"]
-
-        # Create multiple ships with different pathfinding techniques
-        # num_ships = 3
         ships = []
-        # for i in 1:num_ships
-            # if i == 1
-                # Use random pathfinding for the first ship
-                # path = Paths_Module.find_random_path(g)
-            # elseif i == 2
-            #     # Use right pathfinding for the second ship
-            #     path = Paths_Module.find_right_path(g, max_l, multiplier, middle_index)
-            # elseif i == 3
-            #     # Use another custom pathfinding method for the third ship
-            #     path = Paths_Module.find_left_path(g, max_l, multiplier, middle_index)
-            # end
-            # ship = Ship_Module.Ship(x_start, y_start, x_finish, y_finish, max_speed, path, time_step)
 
-            # push!(ships, ship)
-        # end
         path1 = [1, 4, 9, 20, 37, 41, 52, 57, 59, 60] #42
         path2 = [1, 4, 7, 20, 27, 42, 53, 56, 59, 60] #31
         path3 = [1, 4, 9, 15, 33, 43, 49, 56, 59, 60] #53.5
@@ -128,20 +97,18 @@ module Simulation_Module
         push!(ships, ship1)
         push!(ships, ship2)
         push!(ships, ship3)
-        # Main loop to simulate the movement of all ships
+
         while any(ship -> ship.current_node_index < length(ship.path), ships)
             time_generated = Time_Generator_Module.iterate(time_generator)
             if time_generated === nothing
                 break
             end
-            # println("Time generated: ", time_generated)
+
             time, time_generator = time_generated
             time = round(time, digits=4)
-            # Initialize the velocity field
 
             vx_values, vy_values = calculate_velocity_field(grid_points, time, T)
 
-            # Create the plot for this time step
             quiver_plot = initialize_quiver_plot(x_range, y_range, time, T, grid_points, vx_values, vy_values, 
                     [ship.position_x for ship in ships], 
                     [ship.position_y for ship in ships], 
@@ -152,47 +119,40 @@ module Simulation_Module
 
                 Ship_Module.update_field_speed!(ship, Field_Module.v_custom(ship.position_x, ship.position_y, mod(time, 24), T, "x"), Field_Module.v_custom(ship.position_x, ship.position_y, mod(time,24), T, "y"))
 
-                # Add velocity field vector
                 quiver!(quiver_plot, [ship.position_x], [ship.position_y], quiver=([ship.field_speed_x], [ship.field_speed_y]), color=:black, linewidth=2)
     
-                # If ship reached the end of its path, continue to next iteration
                 if ship.current_node_index >= length(ship.path)
                     continue
                 end
 
-                # Update the ship's movement
                 next_x, next_y = node_positions[ship.path[ship.current_node_index + 1]]
                 direction_x = next_x - ship.position_x
                 direction_y = next_y - ship.position_y
                 norm = sqrt(direction_x^2 + direction_y^2)
 
-                # Calculate ship speed and update positions
                 ship_direction_x, ship_direction_y = Utils_Module.calculate_ship_direction([ship.field_speed_x, ship.field_speed_y], [direction_x, direction_y], ship.max_speed)
                 Ship_Module.update_ship_speed!(ship, ship_direction_x, ship_direction_y)
 
                 quiver!(quiver_plot, [ship.position_x], [ship.position_y], quiver=([ship.ship_speed_x], [ship.ship_speed_y]), color=:magenta, linewidth=2)
 
-                Ship_Module.update_resultant_speed!(ship)
+                Ship_Module.update_resultant_ship_speed!(ship)
 
                 quiver!(quiver_plot, [ship.position_x], [ship.position_y], quiver=([ship.resultant_speed_x], [ship.resultant_speed_y]), color=:orange, linewidth=2)
                 v_sum_norm = sqrt(ship.resultant_speed_x^2 + ship.resultant_speed_y^2)
 
                 if norm > 0
-                    # Calculate how far the ship can move towards the next node without overshooting
                     if(norm < v_sum_norm*ship.time_step)
-                        println("TIME: $time")
                         remaining_percentage = 1 - (norm/(v_sum_norm*ship.time_step))
-                        # println("Po drugiej stronie: $remaining_percentage")
                         ship.position_x = next_x
                         ship.position_y = next_y
                         if ship.current_node_index < length(ship.path) - 1
                             tmp_next_x, tmp_next_y = node_positions[ship.path[ship.current_node_index + 2]]
                             tmp_direction_x = tmp_next_x - ship.position_x
                             tmp_direction_y = tmp_next_y - ship.position_y
-                            # println("tmp x: $tmp_direction_x tmp y $tmp_direction_y")
+
                             ship_direction_x, ship_direction_y = Utils_Module.calculate_ship_direction([ship.field_speed_x, ship.field_speed_y], [tmp_direction_x, tmp_direction_y], ship.max_speed)
                             Ship_Module.update_ship_speed!(ship, ship_direction_x, ship_direction_y)
-                            Ship_Module.update_resultant_speed!(ship)
+                            Ship_Module.update_resultant_ship_speed!(ship)
                             
                             ship.position_x += (ship.resultant_speed_x)*remaining_percentage*ship.time_step
                             ship.position_y += (ship.resultant_speed_y)*remaining_percentage*ship.time_step
@@ -202,14 +162,12 @@ module Simulation_Module
                             time_consumed = round(time_step*(1 - remaining_percentage), digits=4)
                         end
                     else
-                        # Update current position of the ship
-                        Ship_Module.move!(ship)
+                        Ship_Module.move_ship!(ship)
                     end
                 end
                 ship.finish_time = round(time + time_consumed, digits=4)
             end
 
-            # Store plot for this time step
             push!(quiver_plots, quiver_plot)
         end
         
@@ -217,7 +175,6 @@ module Simulation_Module
         println("$(ship2.path) -> $(ship2.finish_time)")
         println("$(ship3.path) -> $(ship3.finish_time)")
     
-
         return quiver_plots
     end
 
@@ -235,7 +192,7 @@ module Simulation_Module
         multiplier = generate_graph_settings["multiplier"]
         k = generate_graph_settings["k"]
         m = generate_graph_settings["m"]
-        g, node_positions, middle_index = Create_Graph_Module.generate_graph(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
+        g, node_positions, _ = Create_Graph_Module.generate_graph(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
 
         time_step = config["time_settings"]["time_step"]
         ships = Vector{Ship_Module.Ship}()
@@ -250,8 +207,6 @@ module Simulation_Module
                 for vertex in path
                     push!(ship.continuous_path, node_positions[vertex])
                 end
-
-                # Dodawanie statku do listy (operacja ta może być równoległa, ale należy to zrobić ostrożnie)
                 
                 lock(ship_lock) do
                     push!(ships, ship)
@@ -260,22 +215,18 @@ module Simulation_Module
             push!(tasks, task)
         end
 
-        # Czekamy na zakończenie wszystkich zadań
         for task in tasks
             fetch(task)
         end
 
-        # Lista do przechowywania obiektów `Task` dla każdego statku
         tasks = []
         for ship in ships
-            # Tworzymy nowy wątek dla każdego statku
             task = Threads.@spawn begin
                 Evoluate_Module.evoluate_one_ship(ship)
             end
             push!(tasks, task)
         end
 
-        # Czekamy na zakończenie wszystkich zadań
         for task in tasks
             fetch(task)
         end
@@ -285,31 +236,20 @@ module Simulation_Module
 
 
     function quick_select(ships)
-        n = length(ships)
-        # println(n)
-        
-        # Obliczenie liczby statków, które stanowią 1%
-        k = max(1, div(n, 100))  # Upewniamy się, że k nie jest mniejsze niż 1
-        
-        # Użycie partialsort!, aby znaleźć k największych elementów
+        n = length(ships) 
+        k = max(1, div(n, 100)) 
         partialsort!(ships, n-k+1:n, by = s -> s.finish_time, rev=true)
-        
-        # Zmiana rozmiaru wektora, aby usunąć zbędne elementy
         ships = ships[n-k+1:n]
-        # println("$(length(ships))")
         return ships
     end
 
 
     function find_pareto_points(ships)
-        # Sortujemy statki według finish_time malejąco, a potem fuel_consumption rosnąco
         sort!(ships, by = x -> (x.finish_time, x.fuel_consumption))
 
         max_fuel = Inf
-
         pareto_points = []
 
-        # Przechodzimy po posortowanej liście statków
         for ship in ships
             if ship.fuel_consumption < max_fuel
                 push!(pareto_points, ship)  

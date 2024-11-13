@@ -4,12 +4,10 @@ module Evolution_Algorithm_Module
     using StatsBase
 
     function evoluate_with_evolutionary(ships, g, node_positions, num_points, generations, μ, λ)
-        # Initial population
         population = ships
         best_ships = Vector{Ship_Module.Ship}()
     
         for gen in 1:generations
-            # Generate offspring by mutation
             offspring = Vector{Ship_Module.Ship}()
             
             for ship in population
@@ -25,7 +23,6 @@ module Evolution_Algorithm_Module
                     new_ship = Ship_Module.Ship(node_positions[ship.path[1]][1], node_positions[ship.path[1]][2],
                                                 ship.finish_x, ship.finish_y, ship.max_speed, ship.path, ship.time_step)
                     new_ship.continuous_path = [points[j][rand(1:num_points)] for j in 1:length(ship.path)]
-
 
                     Evoluate_Module.evoluate_one_ship(new_ship)
                     push!(offspring, new_ship)

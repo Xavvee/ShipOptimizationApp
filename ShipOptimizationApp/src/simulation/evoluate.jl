@@ -3,6 +3,8 @@ module Evoluate_Module
     using ..IncludesModule
     using TOML
     using LightGraphs
+    using Random
+
     config_path = joinpath(@__DIR__, "../configuration", "config.toml")
     config = TOML.parsefile(config_path)
 
@@ -66,7 +68,7 @@ module Evoluate_Module
             ship_direction_x, ship_direction_y = Utils_Module.calculate_ship_direction([ship.field_speed_x, ship.field_speed_y], [direction_x, direction_y], ship.max_speed)
             Ship_Module.update_ship_speed!(ship, ship_direction_x, ship_direction_y)
 
-            Ship_Module.update_resultant_speed!(ship)
+            Ship_Module.update_resultant_ship_speed!(ship)
 
             v_sum_norm = sqrt(ship.resultant_speed_x^2 + ship.resultant_speed_y^2)
 
@@ -84,7 +86,7 @@ module Evoluate_Module
                         tmp_direction_y = tmp_next_y - ship.position_y
                         ship_direction_x, ship_direction_y = Utils_Module.calculate_ship_direction([ship.field_speed_x, ship.field_speed_y], [tmp_direction_x, tmp_direction_y], ship.max_speed)
                         Ship_Module.update_ship_speed!(ship, ship_direction_x, ship_direction_y)
-                        Ship_Module.update_resultant_speed!(ship)
+                        Ship_Module.update_resultant_ship_speed!(ship)
                         
                         ship.position_x += (ship.resultant_speed_x)*remaining_percentage*ship.time_step
                         ship.position_y += (ship.resultant_speed_y)*remaining_percentage*ship.time_step
@@ -96,7 +98,7 @@ module Evoluate_Module
                     end
                 else
                     # Update current position of the ship
-                    Ship_Module.move!(ship)
+                    Ship_Module.move_ship!(ship)
                     ship.fuel_consumption = ship.fuel_consumption + Fuel_Consumption_Module.integral_for_r(ship.time_step, sqrt(ship.ship_speed_x^2 + ship.ship_speed_y^2))
                 end
             end
@@ -104,8 +106,6 @@ module Evoluate_Module
         ship.finish_time = round(time + time_consumed, digits=4)
         return ship
     end
-
-    using Random
 
     # Struktura generująca punkty
     struct PointGenerator
@@ -213,15 +213,4 @@ end
 
 
 
-# x_start, y_start = 2, 7
-# x_finish, y_finish = 16, 19
-# k = 4  # Number of segments (k+1 points)
-# max_l = 2  # Max number of points on both sides
-# m = 2 # Distance of points from the line
-# multiplier = 1  # Controls the decrease of points towards the edges
-
-# g, node_positions = Create_Graph_Module.generate_graph(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
-# Create_Graph_Module.plot_graph(g, node_positions)
-
-# find_possible_points(g, node_positions, 6, 10)
 

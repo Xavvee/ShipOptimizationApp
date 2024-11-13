@@ -1,0 +1,14 @@
+Example usage:
+
+vc = [-2.5, 3.0]  # Current velocity vector
+vd = [7.0, 4.0]   # Desired velocity vector (toward the destination)
+vs_speed = 3.0    # Ship's constant speed
+
+# Calculate the ship's velocity direction
+vs = calculate_ship_vector(vc, vd, vs_speed)
+
+println("The ship should go in the direction: $vs")
+
+println("$(vs[1]+vc[1]), $(vs[2]+vc[2])")
+println("$((vs[1]+vc[1])^2), $((vs[2]+vc[2])^2)")
+println("$(sqrt((vs[1]+vc[1])^2+(vs[2]+vc[2])^2))")

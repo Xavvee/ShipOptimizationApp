@@ -9,58 +9,33 @@ module Utils_Module
         return v / norm_v
     end
 
-    # Function to calculate the correct ship direction given current and destination vectors
-    function calculate_ship_vector(vc::Vector{T}, vd::Vector{T}, vs_speed::T) where T
-        # Sprawdzenie, czy vs_speed jest większe od długości wektora vc
-        if vs_speed <= norm(vc)
-            return [-vc[1], -vc[2]]
+    function calculate_ship_vector(current_vector::Vector{T}, direction_vector::Vector{T}, vs_speed::T) where T
+        if vs_speed <= norm(current_vector)
+            return [-current_vector[1], -current_vector[2]]
         end
 
-        direction_to_destination = normalize(vd)
+        direction_to_destination = normalize(direction_vector)
         
-        # Step 1: Decompose the current velocity along the desired direction and perpendicular to it
-        current_in_dest_direction = dot(vc, direction_to_destination) * direction_to_destination
-        current_perpendicular = vc - current_in_dest_direction
+        current_in_dest_direction = dot(current_vector, direction_to_destination) * direction_to_destination
+        current_perpendicular = current_vector - current_in_dest_direction
         
-        # Step 2: The ship must cancel out the perpendicular component of the current
         perpendicular_speed = norm(current_perpendicular)
-        
-        # Step 3: The remaining velocity magnitude for the ship to go toward the destination
+
         remaining_speed = sqrt(vs_speed^2 - perpendicular_speed^2)
         
-        # Step 4: The ship's velocity is the sum of the remaining velocity in the destination direction
         vs_direction = remaining_speed * direction_to_destination - current_perpendicular
-        
         return vs_direction
     end
 
     # Function to calculate the vector the ship should generate to achieve a target direction and speed
-    function calculate_ship_direction(vc::Vector{T}, vd::Vector{T}, max_speed::T) where T
-        # Normalize the destination direction
-        direction_to_destination = normalize(vd)
-        # Target velocity vector (in the desired direction with the desired speed)
+    function calculate_ship_direction(current_vector::Vector{T}, direction_vector::Vector{T}, max_speed::T) where T
+        direction_to_destination = normalize(direction_vector)
+
         target_velocity = max_speed * direction_to_destination
         
-        # Compute the required ship-generated vector to achieve the target velocity when added to the current velocity
-        required_vector = target_velocity - vc
+        required_vector = target_velocity - current_vector
         return required_vector
     end
 
 end
-
-
-
-# # Example vectors
-# vc = [-2.5, 3.0]  # Current velocity vector
-# vd = [7.0, 4.0]   # Desired velocity vector (toward the destination)
-# vs_speed = 3.0    # Ship's constant speed
-
-# # Calculate the ship's velocity direction
-# vs = calculate_ship_vector(vc, vd, vs_speed)
-
-# println("The ship should go in the direction: $vs")
-
-# println("$(vs[1]+vc[1]), $(vs[2]+vc[2])")
-# println("$((vs[1]+vc[1])^2), $((vs[2]+vc[2])^2)")
-# println("$(sqrt((vs[1]+vc[1])^2+(vs[2]+vc[2])^2))")
 

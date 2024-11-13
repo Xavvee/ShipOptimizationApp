@@ -1,0 +1,8 @@
+Example usage:
+
+n_r = 5  # number of intervals
+t_fr_values = [1.0, 2.0, 1.5, 2.5]  # ending time for each r
+v_sr_values = [10.0, 12.0, 15.0, 20.0]  # v_sr for each r
+
+f_c = calculate_f_c(n_r, t_fr_values, v_sr_values)
+println("f_c value: ", f_c)

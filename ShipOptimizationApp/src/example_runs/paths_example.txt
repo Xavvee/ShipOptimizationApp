@@ -1,0 +1,6 @@
+Example usage:
+
+graph, node_positions, middle_index = Create_Graph_Module.generate_graph( 2, 7, 16, 19, 6, 3, 3, 1)
+println(Paths_Module.find_left_path(graph, node_positions, middle_index))
+println(Paths_Module.find_random_path(graph))
+println(Paths_Module.find_right_path(graph, node_positions, middle_index))

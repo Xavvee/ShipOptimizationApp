@@ -1,4 +1,5 @@
 module Paths_Module
+
     using ..IncludesModule
     using LightGraphs
 
@@ -9,16 +10,14 @@ module Paths_Module
         while current != finish
             push!(path, current)
             neighbors_list = collect(neighbors(graph, current))
-            # Sprawdź, czy sąsiedzi są dostępni
             if isempty(neighbors_list)
-                break  # Nie ma więcej sąsiadów, kończymy
+                break
             end
             
-            # Wybierz losowego sąsiada
             current = rand(neighbors_list)
             
         end
-        push!(path, finish)  # Dodaj węzeł końcowy
+        push!(path, finish)
         return path
     end
 
@@ -82,8 +81,3 @@ module Paths_Module
     end
     
 end
-
-# graph, node_positions, middle_index = Create_Graph_Module.generate_graph( 2, 7, 16, 19, 6, 3, 3, 1)
-# println(Paths_Module.find_left_path(graph, node_positions, middle_index))
-# println(Paths_Module.find_random_path(graph))
-# println(Paths_Module.find_right_path(graph, node_positions, middle_index))

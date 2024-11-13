@@ -5,9 +5,8 @@ module Main_Module
 
     using Plots
     using Plots.PlotMeasures
-
-    # Zakresy dla x, y, t
     using TOML
+    
     config_path = joinpath(@__DIR__, "configuration", "config.toml")
     config = TOML.parsefile(config_path)
     main_ranges = config["main_ranges"]
@@ -49,6 +48,7 @@ module Main_Module
         # end
         return ships, evoluated_ships
     end
+
     function simulate_with_gif()
         quiver_plots = Simulation_Module.simulate_multiple_ships(x_range, y_range, T)
         # Wyświetlenie animacji
@@ -69,14 +69,14 @@ module Main_Module
     # end
 
     function display_ship_plots(ships_lists, labels)
-        for i in 1:length(ships_lists)
+        for i in eachindex(ships_lists)
             println("Number of ships in $(labels[i]): $(length(ships_lists[i]))")
         end
     
         pl = plot()
         colors = [:red, :green, :blue]
         
-        for i in 1:length(ships_lists)
+        for i in eachindex(ships_lists)
             scatter!(map(x -> x.finish_time, ships_lists[i]), 
                      map(x -> x.fuel_consumption, ships_lists[i]), 
                      label=labels[i], color=colors[i])
@@ -87,6 +87,6 @@ module Main_Module
         display(pl)
     end
     
-    # Now, you can call the function with the appropriate arguments:
     display_ship_plots([ships1, evoluated_ships, result_ships], ["Ships", "Evoluated Ships", "Result Ships"])
+
 end
