@@ -1,0 +1,89 @@
+# Function to calculate the vector the ship should generate to achieve a target direction and speed
+    function calculate_ship_direction(current_vector::Vector{T}, direction_vector::Vector{T}, max_speed::T) where T
+        direction_to_destination = normalize(direction_vector)
+        
+        dot_product = dot(current_vector, direction_to_destination)
+        alignment_factor = dot_product / (norm(current_vector) * norm(direction_to_destination))
+        
+        current_magnitude = norm(current_vector)
+
+        # Współczynnik podstawowy - zależność od kierunku
+        base_scaling = if alignment_factor > 0
+            (1.5 * alignment_factor)  # zakres [1.0, 2.5] dla wektorów zgodnych
+        else
+            (0.7 * alignment_factor)  # zakres [1.0, 0.3] dla wektorów przeciwnych
+        end
+
+        # Płynne przejście długości current_vector od 0.1 * max_speed do max_speed
+        if current_magnitude < 0.1 * max_speed
+            length_scalling = 0
+        elseif current_magnitude >= max_speed * 2
+            length_scalling = 1
+        else
+            length_scalling = (current_magnitude - 0.1 * max_speed) / (1.9* max_speed)
+        end
+        # println("base_scaling, length_scaling")
+        # println("$base_scaling, $length_scalling")
+        # Finalne skalowanie uwzględniające oba efekty
+        scaling_factor = 1 + base_scaling * length_scalling
+
+        # Oblicz finalny target_velocity
+        target_velocity = scaling_factor * max_speed * direction_to_destination
+        # println("current_vector, target_velocity, scaling_factor")
+        # println("$current_vector, $target_velocity, $scaling_factor")
+        required_vector = target_velocity - current_vector
+        return required_vector
+    end
+end
+# Importujemy moduł
+# using .Utils_Module
+
+# # Funkcja pomocnicza do wyświetlania wyników
+# function print_test_results(description, result)
+#     println(description)
+#     println("Wynik: ", result)
+#     # println(norm(result))
+#     println("-----------")
+# end
+
+# max_speed = 4.0
+
+# # Test 4: Różne sytuacje dla calculate_ship_direction
+# # Przypadek 1: current_vector idealnie w stronę direction_vector
+# current_vector = [2.0, 3.0]
+# direction_vector = [4.0, 6.0]  # ten sam kierunek, inna skala
+# required_vector = Utils_Module.calculate_ship_direction(current_vector, direction_vector, max_speed)
+# print_test_results("Przypadek - current_vector w pełni zgodny z direction_vector", required_vector)
+
+# current_vector = [4.0, 6.0]
+# direction_vector = [4.0, 6.0]  # ten sam kierunek, inna skala
+# required_vector = Utils_Module.calculate_ship_direction(current_vector, direction_vector, max_speed)
+# print_test_results("Przypadek - current_vector w pełni zgodny z direction_vector*2", required_vector)
+
+# current_vector = [8.0, 12.0]
+# direction_vector = [4.0, 6.0]  # ten sam kierunek, inna skala
+# required_vector = Utils_Module.calculate_ship_direction(current_vector, direction_vector, max_speed)
+# print_test_results("Przypadek - current_vector w pełni zgodny z direction_vector*2", required_vector)
+
+
+# # Przypadek 2: current_vector przeciwny do direction_vector
+# current_vector = [-2.0, -3.0]
+# required_vector = Utils_Module.calculate_ship_direction(current_vector, direction_vector, max_speed)
+# print_test_results("Przypadek - current_vector przeciwny do direction_vector", required_vector)
+
+# # Przypadek 2: current_vector przeciwny do direction_vector
+# current_vector = [-4.0, -6.0]
+# required_vector = Utils_Module.calculate_ship_direction(current_vector, direction_vector, max_speed)
+# print_test_results("Przypadek - current_vector przeciwny do direction_vector*2", required_vector)
+
+
+# # Przypadek 3: current_vector prostopadły do direction_vector
+# current_vector = [3.0, -2.0]
+# required_vector = Utils_Module.calculate_ship_direction(current_vector, direction_vector, max_speed)
+# print_test_results("Przypadek - current_vector prostopadły do direction_vector", required_vector)
+
+
+# current_vector = [0.5, 1.0]
+# direction_vector = [4.0, 6.0]  # ten sam kierunek, inna skala
+# required_vector = Utils_Module.calculate_ship_direction(current_vector, direction_vector, max_speed)
+# print_test_results("Przypadek ", required_vector)
