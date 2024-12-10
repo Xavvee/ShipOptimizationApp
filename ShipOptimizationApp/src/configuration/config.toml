@@ -27,7 +27,7 @@ t_range_min = 0
 t_range_step = 0.5
 t_range_max = 23.5
 
-[evoluate_settings]
+[evolve_settings]
 num_points = 100
 
 [simulation_settings]

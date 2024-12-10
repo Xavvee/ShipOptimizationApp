@@ -1,10 +1,10 @@
-module Utils_Module
+module Vector_Calculations_Module
     using LinearAlgebra
 
-    function normalize(v::Vector{T}) where T
+    function normalize(v::Vector{T}) where T 
         norm_v = sqrt(sum(v.^2)) 
-        if norm_v == 0
-            error("Cannot normalize a zero vector")
+        if norm_v == 0.0
+            throw(ErrorException("Cannot normalize a zero vector"))
         end
         return v / norm_v
     end

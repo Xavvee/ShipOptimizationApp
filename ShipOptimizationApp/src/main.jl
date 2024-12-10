@@ -1,6 +1,6 @@
 module Main_Module
 
-    include("utilities/includes.jl")
+    include("includes/includes.jl")
     using .IncludesModule
 
     using Plots
@@ -38,15 +38,15 @@ module Main_Module
         # # end
 
         pareto_points = Simulation_Module.find_pareto_points(ships)
-        evoluated_ships = Evoluate_Module.evoluate(pareto_points, g, node_positions, config["evoluate_settings"]["num_points"])
-        # evoluated_ships = sort(evoluated_ships, by = ship -> ship.finish_time, rev = true)
+        evolved_ships = Evoluate_Module.evolve(pareto_points, g, node_positions, config["evolve_settings"]["num_points"])
+        # evolved_ships = sort(evolved_ships, by = ship -> ship.finish_time, rev = true)
         # sorted_ships = sort(ships, by = ship -> ship.fuel_consumption, rev = true)
 
         # println("------------------")
-        # for ship in evoluated_ships
+        # for ship in evolved_ships
         #     println("Fixed: $(ship.path) -> $(ship.finish_time) | $(ship.fuel_consumption)")
         # end
-        return ships, evoluated_ships
+        return ships, evolved_ships
     end
 
     function simulate_with_gif()
@@ -57,12 +57,12 @@ module Main_Module
         gif(anim, "vector_field.gif", fps=3)
     end
 
-    ships1, evoluated_ships = simulate_without_gif()
+    ships1, evolved_ships = simulate_without_gif()
 
     # simulate_with_gif()
     ships, g, node_positions = Simulation_Module.simulate(T)
 
-    result_ships = Evolution_Algorithm_Module.evoluate_with_evolutionary(ships, g, node_positions, 10, 15, 10, 5)
+    result_ships = Evolution_Algorithm_Module.evolve_with_evolutionary(ships, g, node_positions, 10, 15, 10, 5)
     # println("------------------")
     # for ship in result_ships
     #     println("Fixed: $(ship.path) -> $(ship.finish_time) | $(ship.fuel_consumption)")

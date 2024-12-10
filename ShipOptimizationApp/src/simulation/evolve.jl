@@ -8,7 +8,7 @@ module Evoluate_Module
     config_path = joinpath(@__DIR__, "../configuration", "config.toml")
     config = TOML.parsefile(config_path)
 
-    function evoluate(ships, g, node_positions, num_points)
+    function evolve(ships, g, node_positions, num_points)
         better_ships = Vector{Ship_Module.Ship}() # generalna tablica z lepszymi statkami
         for ship in ships
             modified_ships = Vector{Ship_Module.Ship}() # tablica z "lepszymi statkami" np rozmiaru
@@ -26,7 +26,7 @@ module Evoluate_Module
             end
             better_found = false
             for modified_ship in modified_ships # dla kazdego lepszego statku sprawdz
-                evoluate_one_ship(modified_ship)
+                evolve_one_ship(modified_ship)
                 if modified_ship.finish_time < ship.finish_time
                     better_found = true
                     push!(better_ships, modified_ship)
@@ -41,7 +41,7 @@ module Evoluate_Module
         return better_ships
     end
 
-    function evoluate_one_ship(ship::Ship_Module.Ship)
+    function evolve_one_ship(ship::Ship_Module.Ship)
         points = ship.continuous_path
         time_consumed = 0.0
         n = length(points)
@@ -65,7 +65,7 @@ module Evoluate_Module
             norm = sqrt(direction_x^2 + direction_y^2)
 
             # Calculate ship speed and update positions
-            ship_direction_x, ship_direction_y = Utils_Module.calculate_ship_direction([ship.field_speed_x, ship.field_speed_y], [direction_x, direction_y], ship.max_speed)
+            ship_direction_x, ship_direction_y = Vector_Calculations_Module.calculate_ship_direction([ship.field_speed_x, ship.field_speed_y], [direction_x, direction_y], ship.max_speed)
             Ship_Module.update_ship_speed!(ship, ship_direction_x, ship_direction_y)
 
             Ship_Module.update_resultant_ship_speed!(ship)
@@ -84,7 +84,7 @@ module Evoluate_Module
                         tmp_next_x, tmp_next_y = points[ship.current_node_index + 2]
                         tmp_direction_x = tmp_next_x - ship.position_x
                         tmp_direction_y = tmp_next_y - ship.position_y
-                        ship_direction_x, ship_direction_y = Utils_Module.calculate_ship_direction([ship.field_speed_x, ship.field_speed_y], [tmp_direction_x, tmp_direction_y], ship.max_speed)
+                        ship_direction_x, ship_direction_y = Vector_Calculations_Module.calculate_ship_direction([ship.field_speed_x, ship.field_speed_y], [tmp_direction_x, tmp_direction_y], ship.max_speed)
                         Ship_Module.update_ship_speed!(ship, ship_direction_x, ship_direction_y)
                         Ship_Module.update_resultant_ship_speed!(ship)
                         

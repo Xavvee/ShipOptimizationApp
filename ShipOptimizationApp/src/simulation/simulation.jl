@@ -130,7 +130,7 @@ module Simulation_Module
                 direction_y = next_y - ship.position_y
                 norm = sqrt(direction_x^2 + direction_y^2)
 
-                ship_direction_x, ship_direction_y = Utils_Module.calculate_ship_direction([ship.field_speed_x, ship.field_speed_y], [direction_x, direction_y], ship.max_speed)
+                ship_direction_x, ship_direction_y = Vector_Calculations_Module.calculate_ship_direction([ship.field_speed_x, ship.field_speed_y], [direction_x, direction_y], ship.max_speed)
                 Ship_Module.update_ship_speed!(ship, ship_direction_x, ship_direction_y)
 
                 quiver!(quiver_plot, [ship.position_x], [ship.position_y], quiver=([ship.ship_speed_x], [ship.ship_speed_y]), color=:magenta, linewidth=2)
@@ -150,7 +150,7 @@ module Simulation_Module
                             tmp_direction_x = tmp_next_x - ship.position_x
                             tmp_direction_y = tmp_next_y - ship.position_y
 
-                            ship_direction_x, ship_direction_y = Utils_Module.calculate_ship_direction([ship.field_speed_x, ship.field_speed_y], [tmp_direction_x, tmp_direction_y], ship.max_speed)
+                            ship_direction_x, ship_direction_y = Vector_Calculations_Module.calculate_ship_direction([ship.field_speed_x, ship.field_speed_y], [tmp_direction_x, tmp_direction_y], ship.max_speed)
                             Ship_Module.update_ship_speed!(ship, ship_direction_x, ship_direction_y)
                             Ship_Module.update_resultant_ship_speed!(ship)
                             
@@ -222,7 +222,7 @@ module Simulation_Module
         tasks = []
         for ship in ships
             task = Threads.@spawn begin
-                Evoluate_Module.evoluate_one_ship(ship)
+                Evoluate_Module.evolve_one_ship(ship)
             end
             push!(tasks, task)
         end
