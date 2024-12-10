@@ -1,34 +1,33 @@
-[time_settings]
-time_step = 0.4
-T = 24
-
-[generate_graph_settings]
-max_l = 7
-multiplier = 2
-k = 9
-m = 2
-
-[ship_settings]
-x_start = -7.0 
-y_start = 17.0 
-x_finish = 26.0 
-y_finish = -9.0
-max_speed = 3.0
-
 [main_ranges]
-#range_min, range_step, range_max
-x_range_min = -10
-x_range_step = 4
-x_range_max = 30
-y_range_min = -10 
-y_range_step = 2
+y_range_min = -10
 y_range_max = 30
-t_range_min = 0 
-t_range_step = 0.5
+x_range_max = 30
+x_range_min = -10
 t_range_max = 23.5
+t_range_min = 0
+x_range_step = 4
+t_range_step = 0.5
+y_range_step = 2
 
 [evolve_settings]
 num_points = 100
+
+[generate_graph_settings]
+m = 2
+k = 9
+multiplier = 2
+max_l = 7
+
+[ship_settings]
+x_start = -7.0
+y_start = 17.0
+x_finish = 26.0
+y_finish = -9.0
+max_speed = 3.0
+
+[time_settings]
+T = 24
+time_step = 0.4
 
 [simulation_settings]
 ships_amount = 1000
