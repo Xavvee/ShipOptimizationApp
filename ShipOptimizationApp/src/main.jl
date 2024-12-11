@@ -87,6 +87,7 @@ module Main_Module
         display(pl)
     end
     
+    display_ship_plots([ evolved_ships, result_ships], [ "Evolved Ships", "Result Ships"])
     display_ship_plots([ evolved_ships, result_ships], [ "Evoluated Ships", "Result Ships"])
 
 end
