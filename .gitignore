@@ -23,4 +23,6 @@ docs/site/
 # environment.
 Manifest.toml
 vector_field*.gif
+bigThree*.png
+paretoPoints*.png
 .vscode/

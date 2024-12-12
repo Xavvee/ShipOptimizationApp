@@ -57,12 +57,12 @@ module Main_Module
         gif(anim, "vector_field.gif", fps=3)
     end
 
-    ships1, evolved_ships = simulate_without_gif()
+    # ships1, evolved_ships = simulate_without_gif()
+    simulate_with_gif()
 
-    # simulate_with_gif()
-    ships, g, node_positions = Simulation_Module.simulate(T)
+    # ships, g, node_positions = Simulation_Module.simulate(T)
 
-    result_ships = Evolution_Algorithm_Module.evolve_with_evolutionary(ships, g, node_positions, 10, 15, 10, 5)
+    # result_ships = Evolution_Algorithm_Module.evolve_with_evolutionary(ships, g, node_positions, 10, 15, 10, 5)
     # println("------------------")
     # for ship in result_ships
     #     println("Fixed: $(ship.path) -> $(ship.finish_time) | $(ship.fuel_consumption)")
@@ -73,6 +73,8 @@ module Main_Module
             println("Number of ships in $(labels[i]): $(length(ships_lists[i]))")
         end
     
+        # Pierwszy wykres dla wszystkich statków
+        
         pl = plot()
         colors = [:red, :green, :blue]
         
@@ -82,11 +84,47 @@ module Main_Module
                      label=labels[i], color=colors[i])
         end
     
-        xlabel!("Finish Time")
-        ylabel!("Fuel Consumption")
-        display(pl)
+        xlabel!("Finish Time [h]")
+        ylabel!("Fuel Consumption [100 000 l]")
+        # display(pl)
+        savefig("bigThree.png")
+
+        # Find the fastest ship (with the minimum finish time)
+        all_ships = vcat(ships_lists...)
+        pl_pareto = plot()
+
+        # Znajdź punkty Pareto
+        pareto_ships = Simulation_Module.find_pareto_points(all_ships)
+
+        # Dodaj wszystkie statki do wykresu
+        scatter!(pl_pareto, 
+                map(x -> x.finish_time, all_ships), 
+                map(x -> x.fuel_consumption, all_ships), 
+                label="All Paths", color=:gray, alpha=0.5)
+
+        # Dodaj punkty Pareto do wykresu
+        scatter!(pl_pareto, 
+                map(x -> x.finish_time, pareto_ships), 
+                map(x -> x.fuel_consumption, pareto_ships), 
+                label="Pareto Paths", color=:blue, markersize=5)
+
+        xlabel!("Finish Time [h]")
+        ylabel!("Fuel Consumption [100 000 l]")
+        # display(pl_pareto)
+        savefig("paretoPoints.png")
+
+        println("-------------------------------")
+        fastest_ship_index = argmin(map(x -> x.finish_time, all_ships))
+        fastest_ship = all_ships[fastest_ship_index]
+        println("Fastest ship: Finish Time = $(fastest_ship.finish_time), \n Continuous Path = $(fastest_ship.continuous_path), \n Fuel Consumption = $(fastest_ship.fuel_consumption)")
+
+        println("-------------------------------")
+        # Find the ship with the minimal fuel consumption
+        minimal_fuel_ship_index = argmin(map(x -> x.fuel_consumption, all_ships))
+        minimal_fuel_ship = all_ships[minimal_fuel_ship_index]
+        println("Minimal fuel consumption ship: Fuel Consumption = $(minimal_fuel_ship.fuel_consumption), \n Continuous Path = $(minimal_fuel_ship.continuous_path), \n Finish Time = $(minimal_fuel_ship.finish_time)")
     end
     
-    display_ship_plots([ evolved_ships, result_ships], [ "Evoluated Ships", "Result Ships"])
+    # display_ship_plots([ evolved_ships, result_ships], [ "Naive Algorithm Paths", "Genetic Algorithm Paths"])
 
 end
