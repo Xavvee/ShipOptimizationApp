@@ -1,13 +1,13 @@
 [main_ranges]
 y_range_min = -10
-y_range_max = 30
+y_range_step = 2
 x_range_max = 30
 x_range_min = -10
 t_range_max = 23.5
 t_range_min = 0
 x_range_step = 4
 t_range_step = 0.5
-y_range_step = 2
+y_range_max = 30
 
 [evolve_settings]
 num_points = 100

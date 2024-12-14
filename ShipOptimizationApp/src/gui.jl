@@ -74,7 +74,8 @@ function create_gui()
             if typeof(entry) <: Gtk.Entry
                 
                 # źleeeeeeeeeeeeeee
-                text = entry["text"]  # Extract the text from the GtkEntry widget
+                text = Gtk.get_gtk_property(entry, :text, String)  # Extract the text from the GtkEntry widget
+                println("-----------------")
                 println("Text from entry: $text")  # Print the text
             else
                 println("Warning: entry for $key is not a Gtk.Entry.")
