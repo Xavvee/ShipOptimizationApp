@@ -62,7 +62,7 @@ module Main_Module
 
     ships, g, node_positions = Simulation_Module.simulate(T)
 
-    result_ships = Evolution_Algorithm_Module.evolve_with_evolutionary(ships, g, node_positions, 10, 15, 10, 5)
+    result_ships = Evolution_Algorithm_Module.evolve_with_evolutionary(ships, g, node_positions, 20, 100, 20, 15)
     # println("------------------")
     # for ship in result_ships
     #     println("Fixed: $(ship.path) -> $(ship.finish_time) | $(ship.fuel_consumption)")

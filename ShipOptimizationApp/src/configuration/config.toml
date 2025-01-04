@@ -9,10 +9,10 @@ k = 9
 m = 2
 
 [ship_settings]
-x_start = -7.0 
-y_start = 17.0 
-x_finish = 26.0 
-y_finish = -9.0
+x_start = -105.0 
+y_start = 20.0 
+x_finish = 105.0 
+y_finish = -20.0
 max_speed = 3.0
 
 [main_ranges]
@@ -31,4 +31,4 @@ t_range_max = 23.5
 num_points = 100
 
 [simulation_settings]
-ships_amount = 1000
+ships_amount = 100

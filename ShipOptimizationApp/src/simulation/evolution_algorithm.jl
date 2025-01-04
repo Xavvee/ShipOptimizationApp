@@ -8,16 +8,7 @@ module Evolution_Algorithm_Module
     function evolve_with_evolutionary(ships, g, node_positions, num_points, generations, μ, λ)
         population = ships
         best_ships = Vector{Ship_Module.Ship}()
-
-        # colors = distinguishable_colors(generations)
-        colors = rainbow_colors(generations)
-
-        # Przygotowanie wykresu
-        plot(title="Fuel Consumption vs Finish Time per Generation",
-            xlabel="Finish Time",
-            ylabel="Fuel Consumption")
-    
-
+        min_sums = Float64[]
 
         for gen in 1:generations
             offspring = Vector{Ship_Module.Ship}()
@@ -45,9 +36,7 @@ module Evolution_Algorithm_Module
             combined_population = vcat(population, offspring)
     
             # Select the top μ individuals based on finish time
-            
-            # sorted_population = sort!(combined_population, by = ship -> ship.finish_time)
-            # population = sorted_population[1:μ]
+    
             
             pareto_population = Simulation_Module.find_pareto_points(combined_population)
             pareto_population = sample(pareto_population, min(μ, length(pareto_population)), replace=false)
@@ -56,53 +45,29 @@ module Evolution_Algorithm_Module
             append!(best_ships, pareto_population)
 
 
-            
-            # Plot data for this generation directly
-            scatter!([ship.finish_time for ship in pareto_population], 
-                    [ship.fuel_consumption for ship in pareto_population],
-                    color=colors[gen], label="Generation $gen", ms=4)
-
-            # Dodajemy adnotacje do punktów
-            used_positions = Set{Tuple{Float64, Float64}}()
-            for ship in pareto_population
-                if (ship.finish_time, ship.fuel_consumption) in used_positions
-                    continue
-                end
-
-                push!(used_positions, (ship.finish_time, ship.fuel_consumption))
-                annotate!(ship.finish_time, ship.fuel_consumption, 
-                        text("$gen", 8, 8, font=(:normal, 8)))  # Używamy 'font' zamiast 'fontsize'
-            end
-
             # Update population for the next generation
             population = pareto_population
+
+            # Find the ship with the minimum sum of fuel_consumption + finish_time in this generation
+            min_sum = Inf  # Start with a large value
+            for ship in pareto_population
+                total_sum = ship.fuel_consumption + ship.finish_time
+                if total_sum < min_sum
+                    min_sum = total_sum
+                end
+            end
+
+            push!(min_sums, min_sum)
         end
     
-        savefig("generations3.png")
+        plot(1:generations, min_sums, xlabel="Generations", ylabel="Minimum Fuel + Finish Time", label="Min Sum", title="Evolutionary Progress")
+
+        savefig("generations_best_ships_by_ws4.png")
+
         # Return the best ships found in each generation for further analysis
         return best_ships
         # return Simulation_Module.find_pareto_points(best_ships)
 
     end
-    
-    function rainbow_colors(num_colors::Int)
-        colors =[
-            RGB{Float64}(1.0,1.0,1.0),
-            RGB{Float64}(1.0,0.75,0.75), 
-            RGB{Float64}(1.0,0.5,1.0), 
-            RGB{Float64}(1.0,0.0,0.0), 
-            RGB{Float64}(0.6,0.04,0.0), 
-            RGB{Float64}(0.7142857142857143,1.0,0.0), 
-            RGB{Float64}(0.9,1.0,0.0), 
-            RGB{Float64}(0.0,1.0,0.14285714285714302),
-            RGB{Float64}(0.0,0.5,0.0),  
-            RGB{Float64}(0.0,1.0,1.0), 
-            RGB{Float64}(0.0,0.5714285714285716,1.0), 
-            RGB{Float64}(0.0,0.14285714285714257,1.0), 
-            RGB{Float64}(0.733,0.0,1.0),  
-            RGB{Float64}(0.75,0.75,0.75),
-            RGB{Float64}(0.2,0.0,0.2)]
-        println(colors)
-        return colors
-    end
+
 end
