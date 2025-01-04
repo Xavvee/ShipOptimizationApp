@@ -26,7 +26,7 @@ module Simulation_Module
         x_min, x_max = first(x_range), last(x_range)
         y_min, y_max = first(y_range), last(y_range)
 
-        quiver_plot = plot(xlim=(x_min, x_max), ylim=(y_min, y_max), xlabel="Longitude [10km]", ylabel="Latitude [10km]", title="Pole Wektorowe dla time = $time, T = $T", legend=false, bottom_margin=30px, right_margin=30px)
+        quiver_plot = plot(xlim=(x_min, x_max), ylim=(y_min, y_max), xlabel="Longitude [10km]", ylabel="Latitude [10km]", title="Pole Wektorowe dla time = $time[h], T = $T", legend=false, bottom_margin=30px, right_margin=30px)
         
         quiver!(quiver_plot, [p[1] for p in grid_points], [p[2] for p in grid_points], quiver=(vx_values, vy_values), color=:blue)
         
