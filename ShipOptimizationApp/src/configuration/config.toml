@@ -3,26 +3,26 @@ time_step = 0.4
 T = 24
 
 [generate_graph_settings]
-max_l = 7
-multiplier = 2
-k = 9
-m = 2
+max_l = 10
+multiplier = 1
+k = 18
+m = 5
 
 [ship_settings]
-x_start = -105.0 
-y_start = 20.0 
-x_finish = 105.0 
-y_finish = -20.0
+x_start = -100.0 
+y_start = -50.0 
+x_finish = 100.0 
+y_finish = 50.0
 max_speed = 3.0
 
 [main_ranges]
 #range_min, range_step, range_max
-x_range_min = -10
+x_range_min = -110
 x_range_step = 4
-x_range_max = 30
-y_range_min = -10 
+x_range_max = 100
+y_range_min = -55.0 
 y_range_step = 2
-y_range_max = 30
+y_range_max = 55.0
 t_range_min = 0 
 t_range_step = 0.5
 t_range_max = 23.5
