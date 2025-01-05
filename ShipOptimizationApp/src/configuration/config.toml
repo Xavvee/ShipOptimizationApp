@@ -6,7 +6,7 @@ T = 24
 max_l = 10
 multiplier = 1
 k = 18
-m = 5
+m = 6
 
 [ship_settings]
 x_start = -100.0 
@@ -31,4 +31,4 @@ t_range_max = 23.5
 num_points = 100
 
 [simulation_settings]
-ships_amount = 100
+ships_amount = 40

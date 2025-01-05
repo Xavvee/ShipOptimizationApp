@@ -2,6 +2,9 @@ module Create_Graph_Module
 
     using ..IncludesModule
 
+    # include("graph.jl")
+    # using .Graph_Module
+
     using LightGraphs
     using Plots
 
@@ -124,3 +127,16 @@ module Create_Graph_Module
     end
 
 end
+
+# using .Create_Graph_Module
+
+# x_start, y_start = -100.0, -50.0
+# x_finish, y_finish = 100.0, 50.0
+# k = 18  # Number of segments (k+1 points)
+# max_l = 10  # Max number of points on both sides
+# m = 6 # Distance of points from the line
+# multiplier = 1 # Controls the decrease of points towards the edges
+
+# g, node_positions = Create_Graph_Module.generate_graph(x_start, y_start, x_finish, y_finish, k, max_l, m, multiplier)
+# # Create_Graph_Module.print_graph_connections(g, node_positions)
+# Create_Graph_Module.plot_graph(g, node_positions)

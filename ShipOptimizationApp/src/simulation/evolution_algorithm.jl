@@ -14,10 +14,12 @@ module Evolution_Algorithm_Module
         min_sum = Inf 
         min_fuel = Inf
         min_time = Inf
+        single_parent_children = Int(λ/μ)
 
         for gen in 1:generations
             offspring = Vector{Ship_Module.Ship}()
-            
+            println("Size of population $(length(population))")
+
             for ship in population
                 points = Vector{Vector{Tuple{Float64, Float64}}}()
                 
@@ -26,7 +28,7 @@ module Evolution_Algorithm_Module
                     push!(points, Evoluate_Module.find_possible_points(g, node_positions, vertex, num_points))
                 end
     
-                for i in 1:λ
+                for i in 1:single_parent_children
                     # Mutate ship by selecting a new continuous path
                     new_ship = Ship_Module.Ship(node_positions[ship.path[1]][1], node_positions[ship.path[1]][2],
                                                 ship.finish_x, ship.finish_y, ship.max_speed, ship.path, ship.time_step)
@@ -36,12 +38,14 @@ module Evolution_Algorithm_Module
                     push!(offspring, new_ship)
                 end
             end
+            println("Number of offspring $(length(offspring)) should be 280")
             # Combine parents and offspring
             combined_population = vcat(population, offspring)
-    
+            println("combined_population size: $(length(combined_population))")
             # Select the top μ individuals based on finish time
     
             pareto_population = Simulation_Module.find_pareto_points(combined_population)
+            println("Number of pareto points: $(length(pareto_population))")
             pareto_population = sample(pareto_population, min(μ, length(pareto_population)), replace=false)
 
             # Store the best ship found in this generation
