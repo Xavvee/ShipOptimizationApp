@@ -7,7 +7,7 @@ module Evolution_Algorithm_Module
 
     function evolve_with_evolutionary(ships, g, node_positions, num_points, generations, μ, λ)
         population = ships
-        best_ships = Vector{Ship_Module.Ship}()
+        # best_ships = Vector{Ship_Module.Ship}()
         min_sums = Float64[]
         min_times = Float64[]
         min_fuels = Float64[]
@@ -15,8 +15,9 @@ module Evolution_Algorithm_Module
         min_fuel = Inf
         min_time = Inf
         single_parent_children = Int(λ/μ)
-
+        
         for gen in 1:generations
+            println("--------------------------------")
             offspring = Vector{Ship_Module.Ship}()
             println("Size of population $(length(population))")
 
@@ -45,11 +46,28 @@ module Evolution_Algorithm_Module
             # Select the top μ individuals based on finish time
     
             pareto_population = Simulation_Module.find_pareto_points(combined_population)
-            println("Number of pareto points: $(length(pareto_population))")
-            pareto_population = sample(pareto_population, min(μ, length(pareto_population)), replace=false)
+            println("Number of pareto points1: $(length(pareto_population))")
+            # new_pareto = Vector{Ship_Module.Ship}()
+            while length(pareto_population) < μ
+                println("pareto_population - $(length(pareto_population))")
+                filter!((ship) -> !(ship in pareto_population), combined_population)
+                new_pareto = Simulation_Module.find_pareto_points(combined_population)
+                println("new_pareto - $(length(new_pareto))")
+                println("sum - $(length(pareto_population) + length(new_pareto))")
+                println("diff - $(μ - length(pareto_population))")
 
-            # Store the best ship found in this generation
-            append!(best_ships, pareto_population)
+                if length(pareto_population) + length(new_pareto) > μ
+                    println("pre cut - $(length(new_pareto))")
+                    new_pareto = sample(new_pareto, min(μ - length(pareto_population), length(new_pareto)), replace=false)
+                    println("post cut - $(length(new_pareto))")
+                end
+
+                append!(pareto_population, new_pareto)
+            end
+            println("Number of pareto points2: $(length(pareto_population)), μ = $μ")
+
+            # # Store the best ship found in this generation
+            # append!(best_ships, pareto_population)
 
 
             # Update population for the next generation
@@ -57,7 +75,7 @@ module Evolution_Algorithm_Module
 
             # Find the ship with the minimum sum of fuel_consumption + finish_time in this generation
              # Start with a large value
-            for ship in pareto_population
+            for ship in population
                 total_sum = ship.fuel_consumption + ship.finish_time
                 if total_sum < min_sum
                     min_sum = total_sum
@@ -91,7 +109,7 @@ module Evolution_Algorithm_Module
 
 
         # Return the best ships found in each generation for further analysis
-        return best_ships
+        return population
         # return Simulation_Module.find_pareto_points(best_ships)
 
     end
