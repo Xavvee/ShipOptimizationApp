@@ -5,76 +5,59 @@ module Evolution_Algorithm_Module
     using Colors
     using Plots
 
-    function evolve_with_evolutionary(ships, g, node_positions, num_points, generations, μ, λ)
+    function evolve_with_evolutionary(ships, g, node_positions, num_points, generations, mi, lambda)
         population = ships
-        # best_ships = Vector{Ship_Module.Ship}()
         min_sums = Float64[]
         min_times = Float64[]
         min_fuels = Float64[]
         min_sum = Inf 
         min_fuel = Inf
         min_time = Inf
-        single_parent_children = Int(λ/μ)
         
-        for gen in 1:generations
-            println("--------------------------------")
+        for _ in 1:generations
             offspring = Vector{Ship_Module.Ship}()
-            println("Size of population $(length(population))")
 
-            for ship in population
+            for _ in 1:lambda
+                random_index = rand(1:mi)
+                random_ship = population[random_index]
                 points = Vector{Vector{Tuple{Float64, Float64}}}()
-                
+
                 # Generate possible path points
-                for vertex in ship.path
+                for vertex in random_ship.path
                     push!(points, Evoluate_Module.find_possible_points(g, node_positions, vertex, num_points))
                 end
-    
-                for i in 1:single_parent_children
-                    # Mutate ship by selecting a new continuous path
-                    new_ship = Ship_Module.Ship(node_positions[ship.path[1]][1], node_positions[ship.path[1]][2],
-                                                ship.finish_x, ship.finish_y, ship.max_speed, ship.path, ship.time_step)
-                    new_ship.continuous_path = [points[j][rand(1:num_points)] for j in 1:length(ship.path)]
 
-                    Evoluate_Module.evolve_one_ship(new_ship)
-                    push!(offspring, new_ship)
-                end
+                # Mutate ship by selecting a new continuous path
+                new_ship = Ship_Module.Ship(node_positions[random_ship.path[1]][1], node_positions[random_ship.path[1]][2],
+                                         random_ship.finish_x, random_ship.finish_y, random_ship.max_speed, random_ship.path, random_ship.time_step)
+                new_ship.continuous_path = [points[j][rand(1:num_points)] for j in 1:length(random_ship.path)]
+
+                Evoluate_Module.evolve_one_ship(new_ship)
+                push!(offspring, new_ship)
+    
             end
-            println("Number of offspring $(length(offspring)) should be 280")
+
             # Combine parents and offspring
             combined_population = vcat(population, offspring)
-            println("combined_population size: $(length(combined_population))")
-            # Select the top μ individuals based on finish time
+            # Select the top mi individuals based on finish time
     
             pareto_population = Simulation_Module.find_pareto_points(combined_population)
-            println("Number of pareto points1: $(length(pareto_population))")
             # new_pareto = Vector{Ship_Module.Ship}()
-            while length(pareto_population) < μ
-                println("pareto_population - $(length(pareto_population))")
+            while length(pareto_population) < mi
                 filter!((ship) -> !(ship in pareto_population), combined_population)
                 new_pareto = Simulation_Module.find_pareto_points(combined_population)
-                println("new_pareto - $(length(new_pareto))")
-                println("sum - $(length(pareto_population) + length(new_pareto))")
-                println("diff - $(μ - length(pareto_population))")
 
-                if length(pareto_population) + length(new_pareto) > μ
-                    println("pre cut - $(length(new_pareto))")
-                    new_pareto = sample(new_pareto, min(μ - length(pareto_population), length(new_pareto)), replace=false)
-                    println("post cut - $(length(new_pareto))")
+                if length(pareto_population) + length(new_pareto) > mi
+                    new_pareto = sample(new_pareto, min(mi - length(pareto_population), length(new_pareto)), replace=false)
                 end
 
                 append!(pareto_population, new_pareto)
             end
-            println("Number of pareto points2: $(length(pareto_population)), μ = $μ")
 
-            # # Store the best ship found in this generation
-            # append!(best_ships, pareto_population)
-
-
-            # Update population for the next generation
             population = pareto_population
 
             # Find the ship with the minimum sum of fuel_consumption + finish_time in this generation
-             # Start with a large value
+            # Start with a large value
             for ship in population
                 total_sum = ship.fuel_consumption + ship.finish_time
                 if total_sum < min_sum

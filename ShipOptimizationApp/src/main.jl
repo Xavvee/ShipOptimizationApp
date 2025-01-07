@@ -26,6 +26,12 @@ module Main_Module
     y_range = Simulation_Module.create_custom_range(y_range_min, y_range_step, y_range_max)
     t_range = Simulation_Module.create_custom_range(t_range_min, t_range_step, t_range_max)
 
+    evolve_settings = config["evolve_settings"]
+    num_points = evolve_settings["num_points"]
+    mi = evolve_settings["mi"]
+    lambda = evolve_settings["lambda"]
+    generations = evolve_settings["generations"]
+
     T = config["time_settings"]["T"]
 
     function simulate_without_gif()
@@ -63,7 +69,7 @@ module Main_Module
     ships, g, node_positions = Simulation_Module.simulate(T)
     println("$(length(ships))")
     # function evolve_with_evolutionary(ships, g, node_positions, num_points, generations, μ, λ)
-    result_ships = Evolution_Algorithm_Module.evolve_with_evolutionary(ships, g, node_positions, 10, 50, 40, 280)
+    result_ships = Evolution_Algorithm_Module.evolve_with_evolutionary(ships, g, node_positions, num_points, generations, mi, lambda)
     # println("------------------")
     # for ship in result_ships
     #     println("Fixed: $(ship.path) -> $(ship.finish_time) | $(ship.fuel_consumption)")

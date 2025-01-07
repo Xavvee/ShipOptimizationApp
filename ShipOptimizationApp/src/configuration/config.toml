@@ -28,7 +28,10 @@ t_range_step = 0.5
 t_range_max = 23.5
 
 [evolve_settings]
-num_points = 100
+generations = 1000
+num_points = 10
+mi = 50
+lambda = 350
 
 [simulation_settings]
 ships_amount = 40
