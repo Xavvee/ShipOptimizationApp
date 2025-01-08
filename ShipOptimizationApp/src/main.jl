@@ -63,17 +63,7 @@ module Main_Module
         gif(anim, "vector_field.gif", fps=3)
     end
 
-    # ships1, evolved_ships = simulate_without_gif()
     # simulate_with_gif()
-
-    ships, g, node_positions = Simulation_Module.simulate(T)
-    println("$(length(ships))")
-    # function evolve_with_evolutionary(ships, g, node_positions, num_points, generations, μ, λ)
-    result_ships = Evolution_Algorithm_Module.evolve_with_evolutionary(ships, g, node_positions, num_points, generations, mi, lambda)
-    # println("------------------")
-    # for ship in result_ships
-    #     println("Fixed: $(ship.path) -> $(ship.finish_time) | $(ship.fuel_consumption)")
-    # end
 
     function display_ship_plots(ships_lists, labels)
         for i in eachindex(ships_lists)
@@ -82,7 +72,7 @@ module Main_Module
     
         # Pierwszy wykres dla wszystkich statków
         
-        pl = plot()
+        pl = plot(title="Comparison between the Algorithms")
         colors = [:red, :green, :blue]
         
         for i in eachindex(ships_lists)
@@ -97,28 +87,28 @@ module Main_Module
         savefig("withRandom.png")
 
         # Find the fastest ship (with the minimum finish time)
-        # all_ships = vcat(ships_lists...)
-        # pl_pareto = plot()
+        all_ships = vcat(ships_lists...)
+        pl_pareto = plot(title="Found Pareto Points")
 
         # # Znajdź punkty Pareto
-        # pareto_ships = Simulation_Module.find_pareto_points(all_ships)
+        pareto_ships = Simulation_Module.find_pareto_points(all_ships)
 
         # # Dodaj wszystkie statki do wykresu
-        # scatter!(pl_pareto, 
-        #         map(x -> x.finish_time, all_ships), 
-        #         map(x -> x.fuel_consumption, all_ships), 
-        #         label="All Paths", color=:gray, alpha=0.5)
+        scatter!(pl_pareto, 
+                map(x -> x.finish_time, all_ships), 
+                map(x -> x.fuel_consumption, all_ships), 
+                label="All Paths", color=:gray, alpha=0.5)
 
         # # Dodaj punkty Pareto do wykresu
-        # scatter!(pl_pareto, 
-        #         map(x -> x.finish_time, pareto_ships), 
-        #         map(x -> x.fuel_consumption, pareto_ships), 
-        #         label="Pareto Paths", color=:blue, markersize=5)
+        scatter!(pl_pareto, 
+                map(x -> x.finish_time, pareto_ships), 
+                map(x -> x.fuel_consumption, pareto_ships), 
+                label="Pareto Paths", color=:blue, markersize=5)
 
-        # xlabel!("Finish Time [h]")
-        # ylabel!("Fuel Consumption [100 000 l]")
-        # # display(pl_pareto)
-        # savefig("paretoPoints.png")
+        xlabel!("Finish Time [h]")
+        ylabel!("Fuel Consumption [100 000 l]")
+        # display(pl_pareto)
+        savefig("paretoPoints.png")
 
         # println("-------------------------------")
         # fastest_ship_index = argmin(map(x -> x.finish_time, all_ships))
@@ -131,7 +121,22 @@ module Main_Module
         # minimal_fuel_ship = all_ships[minimal_fuel_ship_index]
         # println("Minimal fuel consumption ship: Fuel Consumption = $(minimal_fuel_ship.fuel_consumption), \n Continuous Path = $(minimal_fuel_ship.continuous_path), \n Finish Time = $(minimal_fuel_ship.finish_time)")
     end
+
+    ships, g, node_positions = Simulation_Module.simulate(T)
+
+    ships1, evolved_ships = simulate_without_gif()
+
+    # function evolve_with_evolutionary(ships, g, node_positions, num_points, generations, μ, λ)
+    result_ships = Evolution_Algorithm_Module.evolve_with_evolutionary(ships, g, node_positions, num_points, generations, mi, lambda)
+    # println("------------------")
+    # for ship in result_ships
+    #     println("Fixed: $(ship.path) -> $(ship.finish_time) | $(ship.fuel_consumption)")
+    # end
+
     
-    # display_ship_plots([ ships1, evolved_ships, result_ships], [ "Random Paths", "Naive Algorithm Paths", "Genetic Algorithm Paths"])
+    
+    display_ship_plots([ ships, evolved_ships, result_ships], [ "Random Paths", "Naive Algorithm Paths", "Evolutionary Algorithm Paths"])
+    # display_ship_plots([ ships, result_ships], [ "Random Paths",  "Evolutionary Algorithm Paths"])
+
 
 end

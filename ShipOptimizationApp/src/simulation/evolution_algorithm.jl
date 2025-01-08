@@ -13,8 +13,12 @@ module Evolution_Algorithm_Module
         min_sum = Inf 
         min_fuel = Inf
         min_time = Inf
-        
-        for _ in 1:generations
+        comparison_plot = plot(title="Comparison between first and last generation")
+
+        for gen in 1:generations
+            if(gen // 100 == 0 || gen == 1)
+                println("Zaczyna się generacja: $(gen)")
+            end
             offspring = Vector{Ship_Module.Ship}()
 
             for _ in 1:lambda
@@ -76,7 +80,23 @@ module Evolution_Algorithm_Module
             push!(min_sums, min_sum)
             push!(min_fuels, min_fuel)
             push!(min_times, min_time)
+
+            if(gen == 1)
+                scatter!(comparison_plot, map(x -> x.finish_time, population), 
+                map(x -> x.fuel_consumption, population), 
+                label="First generation routes", color=:red)
+            end
+
+            if(gen == generations)
+                scatter!(comparison_plot, map(x -> x.finish_time, population), 
+                map(x -> x.fuel_consumption, population), 
+                label="Last generation routes", color=:green)
+                xlabel!("Finish Time [h]")
+                ylabel!("Fuel Consumption [100 000 l]")
+                savefig("generations_comparison.png")
+            end
         end
+
     
         plot(1:generations, min_fuels, xlabel="Generations", ylabel="Fuel Consumption [100 000 l]", legend = false, title="Lowest Fuel Consumption over Generations")
 

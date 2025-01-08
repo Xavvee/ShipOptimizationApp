@@ -6,13 +6,13 @@ T = 24
 max_l = 10
 multiplier = 1
 k = 18
-m = 6
+m = 5
 
 [ship_settings]
-x_start = -100.0 
-y_start = -50.0 
-x_finish = 100.0 
-y_finish = 50.0
+x_start = 0.0 
+y_start = 0.0 
+x_finish = 75.0 
+y_finish = 300.0
 max_speed = 3.0
 
 [main_ranges]
@@ -30,8 +30,8 @@ t_range_max = 23.5
 [evolve_settings]
 generations = 1000
 num_points = 10
-mi = 50
-lambda = 350
+mi = 500
+lambda = 4500
 
 [simulation_settings]
 ships_amount = 40
